@@ -5,6 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I.G.E — GDS Reservation Training Simulator</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2710%27 fill=%27%23071d38%27/%3E%3Ctext x=%2732%27 y=%2740%27 font-family=%27Arial%2C sans-serif%27 font-size=%2222%27 font-weight=%27700%27 fill=%27%2334c9a4%27 text-anchor=%27middle%27%3EIGE%3C/text%3E%3C/svg%3E">
+
+<!-- ================= GOOGLE SHEET SETUP =================
+  1) Create a new Google Sheet (sheets.google.com -> Blank).
+  2) In it: Extensions -> Apps Script. Delete any starter code and paste the
+     doPost() script provided separately (see chat), then Deploy -> New deployment
+     -> type "Web app" -> Execute as: Me -> Who has access: Anyone -> Deploy.
+  3) Copy the "Web app URL" it gives you (ends in /exec) and paste it below,
+     replacing YOUR_APPS_SCRIPT_URL_HERE.
+  4) The script auto-creates two tabs the first time it runs: "Trainees" and "Bookings".
+==================================================== -->
+<script>
+  // ⬇️ REPLACE with YOUR OWN Apps Script Web App URL (ends in /exec)
+  const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyXpN0H1uWyHB5NSHFlge5wiu9y2W9TiVqEZW01WYIJwVMIUjex-bVesw4_ujvmNUBu/exec";
+
+  window.__igeSheetReady = (GOOGLE_SHEET_WEBHOOK_URL && GOOGLE_SHEET_WEBHOOK_URL !== "YOUR_APPS_SCRIPT_URL_HERE");
+  window.__igeSessionId = 'S-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+
+  if(!window.__igeSheetReady){
+    console.warn('I.G.E: Google Sheet URL not set yet — customer data will NOT be saved. See the GOOGLE SHEET SETUP comment at the top of this file.');
+  }
+
+  function igeSendToSheet(payload){
+    if(!window.__igeSheetReady) return;
+    try{
+      // mode:'no-cors' + text/plain avoids a CORS preflight that Apps Script can't answer.
+      // We don't need to read the response, just fire the write.
+      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(function(e){ console.warn('I.G.E: sheet write failed', e); });
+    }catch(e){ console.warn('I.G.E: sheet write failed', e); }
+  }
+
+  // Called once, right after the name/phone gate is validated.
+  window.igeSaveTrainee = function(name, phone){
+    igeSendToSheet({
+      type: 'trainee',
+      name: name,
+      phone: phone,
+      sessionId: window.__igeSessionId,
+      userAgent: navigator.userAgent
+    });
+  };
+
+  // Called every time a trainee completes a booking (ET).
+  window.igeSaveBooking = function(pnr){
+    const trainee = window.__igeTrainee || {name:'', phone:''};
+    igeSendToSheet({
+      type: 'booking',
+      locator: pnr.locator,
+      traineeName: trainee.name,
+      traineePhone: trainee.phone,
+      sessionId: window.__igeSessionId,
+      names: pnr.names,
+      segments: pnr.segments,
+      contacts: pnr.contacts,
+      tk: pnr.tk,
+      rf: pnr.rf,
+      priced: pnr.priced
+    });
+  };
+</script>
+
 <style>
   :root{
     --navy:#3a0a0a;
@@ -459,15 +524,15 @@
   }
 
   /* ---------------- storage ---------------- */
-  async function loadDirectory(){
+  function loadDirectory(){
     try{
-      const res = await window.storage.get('pnr-directory', false);
-      if(res && res.value){ directory = JSON.parse(res.value); }
+      const raw = localStorage.getItem('ige-pnr-directory');
+      if(raw){ directory = JSON.parse(raw); }
     }catch(e){ directory = {}; }
     renderSaved();
   }
-  async function saveDirectory(){
-    try{ await window.storage.set('pnr-directory', JSON.stringify(directory), false); }
+  function saveDirectory(){
+    try{ localStorage.setItem('ige-pnr-directory', JSON.stringify(directory)); }
     catch(e){ /* non-fatal in a training tool */ }
   }
 
@@ -699,7 +764,8 @@
     }
     if(!draft.locator) draft.locator = randLocator();
     directory[draft.locator] = JSON.parse(JSON.stringify(draft));
-    await saveDirectory();
+    saveDirectory();
+    if(typeof window.igeSaveBooking === 'function'){ window.igeSaveBooking(directory[draft.locator]); }
     banner('END TRANSACTION — ET');
     print('PNR CREATED SUCCESSFULLY','ok');
     print('RECORD LOCATOR: '+draft.locator,'ok');
@@ -858,7 +924,7 @@
   document.getElementById('btnWipe').addEventListener('click', async ()=>{
     if(!confirm('This clears all saved PNRs from storage for this simulator. Continue?')) return;
     directory = {};
-    try{ await window.storage.set('pnr-directory','{}',false); }catch(e){}
+    try{ localStorage.removeItem('ige-pnr-directory'); }catch(e){}
     draft = emptyDraft();
     availability = [];
     termBody.innerHTML='';
@@ -921,6 +987,7 @@
       if(headEl){
         headEl.textContent = 'I.G.E TRAINING TERMINAL — SIGNED IN AS ' + traineeName.toUpperCase() + ' — DUTY CODE 96';
       }
+      if(typeof window.igeSaveTrainee === 'function'){ window.igeSaveTrainee(traineeName, traineePhone); }
     }catch(err){}
     gateScreen.style.display = 'none';
     appMain.style.display = 'block';
