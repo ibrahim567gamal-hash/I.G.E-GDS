@@ -4,72 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I.G.E — GDS Reservation Training Simulator</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2710%27 fill=%27%23071d38%27/%3E%3Ctext x=%2732%27 y=%2740%27 font-family=%27Arial%2C sans-serif%27 font-size=%2222%27 font-weight=%27700%27 fill=%27%2334c9a4%27 text-anchor=%27middle%27%3EIGE%3C/text%3E%3C/svg%3E">
-
-<!-- ================= GOOGLE SHEET SETUP =================
-  1) Create a new Google Sheet (sheets.google.com -> Blank).
-  2) In it: Extensions -> Apps Script. Delete any starter code and paste the
-     doPost() script provided separately (see chat), then Deploy -> New deployment
-     -> type "Web app" -> Execute as: Me -> Who has access: Anyone -> Deploy.
-  3) Copy the "Web app URL" it gives you (ends in /exec) and paste it below,
-     replacing YOUR_APPS_SCRIPT_URL_HERE.
-  4) The script auto-creates two tabs the first time it runs: "Trainees" and "Bookings".
-==================================================== -->
-<script>
-  // ⬇️ REPLACE with YOUR OWN Apps Script Web App URL (ends in /exec)
-  const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyXpN0H1uWyHB5NSHFlge5wiu9y2W9TiVqEZW01WYIJwVMIUjex-bVesw4_ujvmNUBu/exec";
-
-  window.__igeSheetReady = (GOOGLE_SHEET_WEBHOOK_URL && GOOGLE_SHEET_WEBHOOK_URL !== "YOUR_APPS_SCRIPT_URL_HERE");
-  window.__igeSessionId = 'S-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
-
-  if(!window.__igeSheetReady){
-    console.warn('I.G.E: Google Sheet URL not set yet — customer data will NOT be saved. See the GOOGLE SHEET SETUP comment at the top of this file.');
-  }
-
-  function igeSendToSheet(payload){
-    if(!window.__igeSheetReady) return;
-    try{
-      // mode:'no-cors' + text/plain avoids a CORS preflight that Apps Script can't answer.
-      // We don't need to read the response, just fire the write.
-      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(function(e){ console.warn('I.G.E: sheet write failed', e); });
-    }catch(e){ console.warn('I.G.E: sheet write failed', e); }
-  }
-
-  // Called once, right after the name/phone gate is validated.
-  window.igeSaveTrainee = function(name, phone){
-    igeSendToSheet({
-      type: 'trainee',
-      name: name,
-      phone: phone,
-      sessionId: window.__igeSessionId,
-      userAgent: navigator.userAgent
-    });
-  };
-
-  // Called every time a trainee completes a booking (ET).
-  window.igeSaveBooking = function(pnr){
-    const trainee = window.__igeTrainee || {name:'', phone:''};
-    igeSendToSheet({
-      type: 'booking',
-      locator: pnr.locator,
-      traineeName: trainee.name,
-      traineePhone: trainee.phone,
-      sessionId: window.__igeSessionId,
-      names: pnr.names,
-      segments: pnr.segments,
-      contacts: pnr.contacts,
-      tk: pnr.tk,
-      rf: pnr.rf,
-      priced: pnr.priced
-    });
-  };
-</script>
-
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%233a0a0a%27/%3E%3Cpath d=%27M14 34l30-13-6 13 6 13-30-13z%27 fill=%27%23ff8a7a%27/%3E%3C/svg%3E">
 <style>
   :root{
     --navy:#3a0a0a;
@@ -102,12 +37,29 @@
     font-family:var(--sans);
     -webkit-font-smoothing:antialiased;
   }
+
+  /* ---------- Icon system ---------- */
+  .ico{
+    width:1em;height:1em;
+    flex:none;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    vertical-align:-0.13em;
+  }
+  .ico.solid{fill:currentColor;stroke:none;}
+  .ico-lg{width:1.35em;height:1.35em;}
+
   /* ---------- Top bar ---------- */
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
     padding:10px 22px;
     background:linear-gradient(180deg,var(--navy),#150202);
     border-bottom:3px solid var(--brand);
+    flex-wrap:wrap;
   }
   .brand{display:flex;align-items:center;gap:14px;}
   .brand .logo{
@@ -116,6 +68,7 @@
     align-items:center;
   }
   .ige-logo{
+    display:inline-flex;align-items:center;gap:8px;
     font-family:Arial, Helvetica, sans-serif;
     font-weight:800;
     font-size:22px;
@@ -126,7 +79,9 @@
     border-radius:6px;
     border:1px solid #6b1c1c;
   }
+  .ige-logo .ico{color:#ff8a7a;}
   .brand .tag{
+    display:flex;align-items:center;gap:7px;
     font-size:11px;
     color:#e6a89f;
     text-transform:uppercase;
@@ -134,8 +89,9 @@
     border-left:1px solid #6b1c1c;
     padding-left:12px;
   }
-  .topbar-actions{display:flex;gap:8px;}
+  .topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
   .tbtn{
+    display:inline-flex;align-items:center;gap:6px;
     font-family:var(--sans);
     font-size:12.5px;
     font-weight:600;
@@ -149,8 +105,11 @@
   }
   .tbtn:hover{background:#4d1616;}
   .tbtn:active{transform:translateY(1px);}
+  .tbtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
   .tbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
   .tbtn.primary:hover{background:var(--brand-deep);}
+  .tbtn.admin{background:#1f3a2b;border-color:#2f5c43;color:#c8f5dd;}
+  .tbtn.admin:hover{background:#2a4f39;}
 
   /* ---------- Layout ---------- */
   .layout{
@@ -166,6 +125,51 @@
     .layout{grid-template-columns:1fr;}
   }
 
+  /* ---------- Route strip (tourism identity) ---------- */
+  .route-strip{
+    grid-column:1 / -1;
+    display:flex;align-items:center;gap:14px;
+    background:var(--panel-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 18px;
+    overflow:hidden;
+  }
+  .route-strip .node{
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:13px;font-weight:700;color:var(--brand-deep);
+  }
+  .route-strip .node small{
+    display:block;font-family:var(--sans);font-size:10px;font-weight:600;
+    color:var(--ink-soft);letter-spacing:.6px;text-transform:uppercase;
+  }
+  .route-line{
+    flex:1;position:relative;height:2px;
+    background:repeating-linear-gradient(90deg,var(--line) 0 7px,transparent 7px 14px);
+  }
+  .route-line .plane{
+    position:absolute;top:50%;left:0;
+    transform:translate(-50%,-50%);
+    color:var(--brand);
+    animation:fly 9s linear infinite;
+  }
+  @keyframes fly{
+    0%{left:0%;opacity:0;}
+    8%{opacity:1;}
+    92%{opacity:1;}
+    100%{left:100%;opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .route-line .plane{animation:none;left:50%;}
+  }
+  .route-strip .meta{
+    display:flex;align-items:center;gap:6px;
+    font-size:11.5px;color:var(--ink-soft);
+  }
+  @media (max-width:720px){
+    .route-strip .meta{display:none;}
+  }
+
   /* ---------- Terminal ---------- */
   .terminal-wrap{
     background:linear-gradient(160deg,var(--terminal-bg),#180404);
@@ -175,11 +179,11 @@
     overflow:hidden;
     display:flex;
     flex-direction:column;
-    height:calc(100vh - 108px);
+    height:calc(100vh - 178px);
     min-height:520px;
   }
   .terminal-head{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:9px 14px;
     background:var(--terminal-line);
     border-bottom:1px solid #3a1010;
@@ -187,7 +191,9 @@
     font-size:11.5px;
     color:var(--phosphor-dim);
   }
-  .terminal-head .dots{display:flex;gap:6px;}
+  .terminal-head .head-left{display:flex;align-items:center;gap:8px;min-width:0;}
+  .terminal-head .head-left span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .terminal-head .dots{display:flex;gap:6px;flex:none;}
   .terminal-head .dots span{width:9px;height:9px;border-radius:50%;background:#4a1a1a;display:inline-block;}
   .terminal-body{
     flex:1;
@@ -221,6 +227,7 @@
   }
   .terminal-input-bar input{
     flex:1;
+    min-width:0;
     background:transparent;
     border:none;
     outline:none;
@@ -229,8 +236,9 @@
     font-size:14px;
     caret-color:var(--phosphor-bright);
   }
-  .terminal-input-bar input::placeholder{color:#2f4b58;}
+  .terminal-input-bar input::placeholder{color:#7a3d38;}
   .send-btn{
+    display:inline-flex;align-items:center;gap:6px;
     font-family:var(--mono);
     font-size:12px;
     color:var(--navy);
@@ -261,13 +269,14 @@
   .card h3 .n{
     background:var(--brand);color:#fff;border-radius:5px;
     font-size:10.5px;padding:1px 6px;letter-spacing:0;
+    margin-left:auto;
   }
 
   /* scenario */
   .steps{list-style:none;margin:0;padding:0;counter-reset:step;}
   .steps li{
     counter-increment:step;
-    display:flex;gap:10px;
+    display:flex;gap:10px;align-items:center;
     padding:7px 0;
     border-bottom:1px dashed var(--line);
     font-size:12.5px;
@@ -282,8 +291,9 @@
     display:flex;align-items:center;justify-content:center;
     font-family:var(--mono);
   }
+  .steps li .ico{color:var(--brand);font-size:14px;}
   .steps code{
-    font-family:var(--mono);color:var(--ink);background:#f2f6fa;
+    font-family:var(--mono);color:var(--ink);background:#fdf1ef;
     padding:1px 5px;border-radius:4px;font-size:11.5px;
   }
 
@@ -301,46 +311,70 @@
   .cheat-item .desc{font-size:11.5px;color:var(--ink-soft);text-align:right;}
 
   /* draft pnr */
-  .empty{font-size:12.5px;color:#94a3ae;font-style:italic;}
-  .pill{
-    display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;
-    padding:2px 7px;border-radius:5px;margin-right:6px;margin-bottom:6px;
+  .empty{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;color:#b08d88;font-style:italic;
   }
+  .empty .ico{font-size:16px;font-style:normal;flex:none;}
+  .pill{
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    padding:3px 8px;border-radius:5px;margin-right:6px;margin-bottom:6px;
+  }
+  .pill .ico{font-size:12px;}
   .pill.name{background:#fbe4e0;color:var(--brand-deep);}
   .pill.seg{background:#ffe9e5;color:#a83226;}
   .pill.contact{background:#fff1e6;color:#8a5b0a;}
-  .pill.locator{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;font-size:12.5px;padding:4px 10px;}
-  .draft-row{font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-family:var(--mono);}
+  .pill.locator{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;font-size:12.5px;padding:5px 11px;}
+  .draft-row{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-family:var(--mono);
+  }
+  .draft-row .ico{font-size:13px;color:var(--brand);}
 
   /* saved pnrs */
   .saved-item{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
     padding:8px 6px;border-radius:6px;cursor:pointer;
     border:1px solid transparent;
   }
   .saved-item:hover{background:var(--panel-bg);border-color:var(--line);}
-  .saved-item .loc{font-family:var(--mono);font-weight:700;color:var(--brand-deep);font-size:12.5px;}
+  .saved-item .loc{
+    display:flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-weight:700;color:var(--brand-deep);font-size:12.5px;
+  }
   .saved-item .who{font-size:11px;color:var(--ink-soft);}
 
   footer{
-    text-align:center;font-size:11px;color:#8b9aa8;padding:10px 0 22px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    text-align:center;font-size:11px;color:#a9827c;padding:10px 16px 22px;
   }
 
-  /* ---------- Gate screen (name + phone) ---------- */
+  /* ---------- Gate screen ---------- */
   #gateScreen{
     position:fixed;inset:0;z-index:999;
     display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 30% 20%,#5a1414 0%,#2a0606 55%,#150202 100%);
     padding:20px;
+    overflow:auto;
   }
   .gate-card{
-    width:100%;max-width:380px;
+    width:100%;max-width:390px;
     background:var(--panel-card);
     border-radius:14px;
-    padding:28px 26px 24px;
+    padding:26px 26px 22px;
     box-shadow:0 24px 60px -20px rgba(0,0,0,.55);
     border:1px solid var(--line);
+    position:relative;
   }
+  .gate-ribbon{
+    display:flex;align-items:center;justify-content:center;gap:16px;
+    color:var(--brand);
+    font-size:19px;
+    margin-bottom:12px;
+    opacity:.85;
+  }
+  .gate-ribbon .ico{font-size:20px;}
   .gate-logo{
     display:flex;align-items:center;justify-content:center;gap:10px;
     margin-bottom:6px;
@@ -348,13 +382,15 @@
   .gate-logo .ige-logo{font-size:20px;}
   .gate-title{
     text-align:center;font-size:13px;color:var(--ink-soft);
-    margin:2px 0 22px;letter-spacing:.3px;
+    margin:2px 0 20px;letter-spacing:.3px;
   }
   .gate-field{margin-bottom:14px;}
   .gate-field label{
-    display:block;font-size:12px;font-weight:700;color:var(--brand-deep);
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:700;color:var(--brand-deep);
     margin-bottom:6px;letter-spacing:.2px;
   }
+  .gate-field label .ico{font-size:14px;}
   .gate-field input{
     width:100%;
     padding:10px 12px;
@@ -377,6 +413,7 @@
   }
   .gate-error.show{display:block;}
   .gate-submit{
+    display:flex;align-items:center;justify-content:center;gap:8px;
     width:100%;margin-top:6px;
     padding:11px;border:none;border-radius:8px;
     background:linear-gradient(135deg,var(--brand),var(--brand-deep));
@@ -386,56 +423,389 @@
   .gate-submit:hover{opacity:.92;}
   .gate-submit:active{transform:translateY(1px);}
   .gate-foot{
-    text-align:center;font-size:10.5px;color:#a99;margin-top:14px;
+    text-align:center;font-size:10.5px;color:#b08d88;margin-top:14px;
   }
+  .gate-divider{
+    display:flex;align-items:center;gap:10px;
+    margin:16px 0 12px;color:#c9a9a4;font-size:10.5px;letter-spacing:1px;
+  }
+  .gate-divider::before,.gate-divider::after{
+    content:"";flex:1;height:1px;background:var(--line);
+  }
+  .admin-toggle{
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    width:100%;
+    background:transparent;border:1px solid var(--line);
+    color:var(--ink-soft);
+    font-family:var(--sans);font-size:12px;font-weight:600;
+    padding:9px;border-radius:8px;cursor:pointer;
+    transition:background .12s ease,border-color .12s ease;
+  }
+  .admin-toggle:hover{background:var(--panel-bg);border-color:#e6c6c1;}
+  #adminLoginBox{display:none;margin-top:12px;}
+  #adminLoginBox.show{display:block;}
   #appMain{display:none;}
+
+  /* ---------- Admin panel ---------- */
+  #adminScreen{
+    display:none;
+    position:fixed;inset:0;z-index:1000;
+    background:linear-gradient(165deg,#fdf1ef 0%,#f7d9d4 100%);
+    overflow:auto;
+  }
+  #adminScreen.show{display:block;}
+  .admin-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 22px;
+    background:linear-gradient(180deg,#12261c,#0a1611);
+    border-bottom:3px solid #2f7d5b;
+    flex-wrap:wrap;
+  }
+  .admin-bar .title{
+    display:flex;align-items:center;gap:10px;
+    color:#c8f5dd;font-size:15px;font-weight:800;letter-spacing:.4px;
+  }
+  .admin-bar .title .ico{font-size:20px;color:#5fd6a0;}
+  .admin-bar .title small{
+    display:block;font-size:10.5px;font-weight:600;color:#7fae97;letter-spacing:1px;text-transform:uppercase;
+  }
+  .admin-wrap{max-width:1240px;margin:0 auto;padding:18px;}
+  .stat-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:12px;margin-bottom:16px;
+  }
+  .stat{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px 16px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .stat .badge{
+    width:38px;height:38px;border-radius:9px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-bg);color:var(--brand);font-size:19px;
+  }
+  .stat .v{font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;font-family:var(--mono);}
+  .stat .k{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.9px;}
+  .admin-tools{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .search-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;flex:1;min-width:220px;
+    color:var(--ink-soft);
+  }
+  .search-box input{
+    flex:1;border:none;outline:none;background:transparent;
+    font-family:var(--sans);font-size:13px;color:var(--ink);min-width:0;
+  }
+  .abtn{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--sans);font-size:12.5px;font-weight:600;
+    background:var(--panel-card);color:var(--brand-deep);
+    border:1px solid var(--line);
+    padding:9px 13px;border-radius:8px;cursor:pointer;
+    transition:background .12s ease;
+  }
+  .abtn:hover{background:var(--panel-bg);}
+  .abtn.danger{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .abtn.danger:hover{background:var(--brand-deep);}
+  .table-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .table-scroll{overflow-x:auto;}
+  table.log{width:100%;border-collapse:collapse;min-width:760px;}
+  table.log th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;
+    color:var(--brand-deep);background:var(--panel-bg);
+    padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.log td{
+    padding:11px 14px;border-bottom:1px solid var(--line);
+    font-size:12.5px;color:var(--ink-soft);vertical-align:middle;
+  }
+  table.log tr:last-child td{border-bottom:none;}
+  table.log tr:hover td{background:#fffaf9;}
+  .who-cell{display:flex;align-items:center;gap:9px;}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+    color:#fff;font-weight:800;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .who-cell .nm{font-weight:700;color:var(--ink);font-size:13px;}
+  .who-cell .sub{font-size:10.5px;color:#b08d88;font-family:var(--mono);}
+  td.mono{font-family:var(--mono);font-size:12px;color:var(--ink);}
+  .tag-role{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  .tag-role.trainee{background:#fbe4e0;color:var(--brand-deep);}
+  .tag-role.admin{background:#dcf5e8;color:#1f6b4a;}
+  .tag-pnr{
+    display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;
+    background:#fff1e6;color:#8a5b0a;padding:2px 6px;border-radius:4px;margin:2px 3px 2px 0;
+  }
+  .admin-empty{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:48px 20px;color:#b08d88;font-size:13px;text-align:center;
+  }
+  .admin-empty .ico{font-size:34px;color:#e6c6c1;}
+  .admin-note{
+    display:flex;gap:9px;align-items:flex-start;
+    font-size:11.5px;color:var(--ink-soft);
+    background:#fff6f4;border:1px dashed #ecd0cb;border-radius:8px;
+    padding:11px 13px;margin-top:14px;line-height:1.6;
+  }
+  .admin-note .ico{font-size:15px;color:var(--brand);margin-top:1px;}
 </style>
 </head>
 <body>
 
-<!-- GATE SCREEN: name + phone must be entered/validated before booking -->
+<!-- ===== ICON SPRITE (tourism / air travel) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-plane" viewBox="0 0 24 24">
+    <path d="M21 15.5l-8.5-4V5.2a1.7 1.7 0 0 0-3.4 0v6.3L1 15.5v2l8.1-2.3v4l-2.4 1.6V22l3.9-1 3.9 1v-1.2l-2.4-1.6v-4l8.1 2.3z"/>
+  </symbol>
+  <symbol id="i-takeoff" viewBox="0 0 24 24">
+    <path d="M2.5 19h19"/><path d="M4 14.6l1.9.5 3.6-3-4.8-5.4 1.7-.5 6.4 4.4 4.1-1.1a2 2 0 1 1 1 3.8L5.6 17z"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>
+  </symbol>
+  <symbol id="i-suitcase" viewBox="0 0 24 24">
+    <rect x="2.5" y="7.5" width="19" height="13" rx="2.5"/><path d="M8.5 7.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v2.5"/><path d="M8.5 20.5v-13M15.5 20.5v-13"/>
+  </symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24">
+    <path d="M3 8.5V6.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 6.5v2a2.2 2.2 0 0 0 0 4.4v4.6a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-4.6a2.2 2.2 0 0 0 0-4.4z"/><path d="M14 5v3M14 11v2M14 16v3"/>
+  </symbol>
+  <symbol id="i-passport" viewBox="0 0 24 24">
+    <rect x="4" y="2.5" width="16" height="19" rx="2.4"/><circle cx="12" cy="10" r="3.2"/><path d="M8.8 17.2h6.4"/>
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24">
+    <path d="M12 21.5s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10.3" r="2.7"/>
+  </symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/>
+  </symbol>
+  <symbol id="i-users" viewBox="0 0 24 24">
+    <circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16.2 5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.4 14.2A6.2 6.2 0 0 1 21.2 20"/>
+  </symbol>
+  <symbol id="i-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="3.8"/><path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24">
+    <path d="M6.6 3.5h3l1.5 3.8-2 1.4a11 11 0 0 0 5.2 5.2l1.4-2 3.8 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24">
+    <path d="M12 2.6l7.5 3v6.1c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7V5.6z"/><path d="M9 12.2l2.1 2.1 4-4.1"/>
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24">
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8.2 10.5V7.6a3.8 3.8 0 0 1 7.6 0v2.9"/>
+  </symbol>
+  <symbol id="i-log" viewBox="0 0 24 24">
+    <rect x="4" y="3" width="16" height="18" rx="2.2"/><path d="M8 8h8M8 12h8M8 16h5"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>
+  </symbol>
+  <symbol id="i-download" viewBox="0 0 24 24">
+    <path d="M12 3.5v11"/><path d="M7.8 10.5L12 14.7l4.2-4.2"/><path d="M4.5 19.5h15"/>
+  </symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24">
+    <path d="M20 11.5a8 8 0 1 0-1.3 5.5"/><path d="M20 5.5v6h-6"/>
+  </symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24">
+    <path d="M4 6.5h16"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/><path d="M6.5 6.5l.9 13a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13"/>
+  </symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24">
+    <path d="M14.5 3.5h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>
+  </symbol>
+  <symbol id="i-help" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.7v.3"/><path d="M12 17.2h.01"/>
+  </symbol>
+  <symbol id="i-list" viewBox="0 0 24 24">
+    <path d="M8.5 6.5h12M8.5 12h12M8.5 17.5h12"/><path d="M4 6.5h.01M4 12h.01M4 17.5h.01"/>
+  </symbol>
+  <symbol id="i-info" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.8h.01"/>
+  </symbol>
+  <symbol id="i-tower" viewBox="0 0 24 24">
+    <path d="M10 21h4"/><path d="M12 21V10"/><path d="M8.5 10h7l-1-4.5h-5z"/><path d="M6 4.2A9 9 0 0 0 6 13"/><path d="M18 4.2a9 9 0 0 1 0 8.8"/>
+  </symbol>
+  <symbol id="i-seat" viewBox="0 0 24 24">
+    <path d="M6.5 3.5h3l1.2 9h5.8"/><path d="M6.5 3.5l1.4 12.5a2 2 0 0 0 2 1.8h8.6"/><path d="M18.5 20.5h-11"/>
+  </symbol>
+</svg>
+
+<!-- ===== GATE SCREEN ===== -->
 <div id="gateScreen">
   <div class="gate-card">
-    <div class="gate-logo"><div class="ige-logo">I.G.E</div></div>
+    <div class="gate-ribbon">
+      <svg class="ico"><use href="#i-takeoff"/></svg>
+      <svg class="ico"><use href="#i-passport"/></svg>
+      <svg class="ico"><use href="#i-globe"/></svg>
+      <svg class="ico"><use href="#i-suitcase"/></svg>
+      <svg class="ico"><use href="#i-ticket"/></svg>
+    </div>
+    <div class="gate-logo">
+      <div class="ige-logo"><svg class="ico solid"><use href="#i-plane"/></svg>I.G.E</div>
+    </div>
     <div class="gate-title">قبل الدخول على الحجز، من فضلك أدخل بياناتك</div>
 
     <form id="gateForm" novalidate>
       <div class="gate-field">
-        <label for="gateName">الاسم بالكامل</label>
+        <label for="gateName"><svg class="ico"><use href="#i-user"/></svg>الاسم بالكامل</label>
         <input id="gateName" type="text" autocomplete="off" placeholder="مثال: أحمد محمد">
         <div class="gate-error" id="gateNameErr">من فضلك أدخل اسمًا صحيحًا (حرفين على الأقل).</div>
       </div>
       <div class="gate-field">
-        <label for="gatePhone">رقم التليفون</label>
+        <label for="gatePhone"><svg class="ico"><use href="#i-phone"/></svg>رقم التليفون</label>
         <input id="gatePhone" type="tel" autocomplete="off" placeholder="مثال: 01012345678" inputmode="numeric">
         <div class="gate-error" id="gatePhoneErr">من فضلك أدخل رقم تليفون صحيح (من 8 إلى 15 رقم).</div>
       </div>
-      <button type="submit" class="gate-submit" id="gateSubmit">دخول إلى الحجز</button>
+      <button type="submit" class="gate-submit" id="gateSubmit">
+        <svg class="ico"><use href="#i-takeoff"/></svg>دخول إلى الحجز
+      </button>
     </form>
-    <div class="gate-foot">بياناتك تُستخدم فقط لبدء جلسة التدريب.</div>
+
+    <div class="gate-divider">أو</div>
+    <button type="button" class="admin-toggle" id="btnAdminToggle">
+      <svg class="ico"><use href="#i-shield"/></svg>دخول المشرف (Admin)
+    </button>
+
+    <div id="adminLoginBox">
+      <div class="gate-field" style="margin-top:12px;">
+        <label for="adminPass"><svg class="ico"><use href="#i-lock"/></svg>كلمة مرور المشرف</label>
+        <input id="adminPass" type="password" autocomplete="off" placeholder="••••••••">
+        <div class="gate-error" id="adminPassErr">كلمة المرور غير صحيحة.</div>
+      </div>
+      <button type="button" class="gate-submit" id="btnAdminEnter">
+        <svg class="ico"><use href="#i-log"/></svg>فتح سجل الدخول
+      </button>
+    </div>
+
+    <div class="gate-foot">بياناتك تُستخدم فقط لبدء جلسة التدريب وتسجيلها في سجل الدخول.</div>
   </div>
 </div>
 
+<!-- ===== ADMIN SCREEN ===== -->
+<div id="adminScreen">
+  <div class="admin-bar">
+    <div class="title">
+      <svg class="ico"><use href="#i-shield"/></svg>
+      <div>لوحة المشرف<small>Access log — who signed in</small></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="tbtn admin" id="btnAdminRefresh"><svg class="ico"><use href="#i-refresh"/></svg>تحديث</button>
+      <button class="tbtn admin" id="btnAdminExport"><svg class="ico"><use href="#i-download"/></svg>تصدير CSV</button>
+      <button class="tbtn primary" id="btnAdminClear"><svg class="ico"><use href="#i-trash"/></svg>مسح السجل</button>
+      <button class="tbtn" id="btnAdminExit"><svg class="ico"><use href="#i-exit"/></svg>خروج</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-log"/></svg></div>
+        <div><div class="v" id="statSessions">0</div><div class="k">إجمالي الجلسات</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-users"/></svg></div>
+        <div><div class="v" id="statPeople">0</div><div class="k">متدربين مختلفين</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-ticket"/></svg></div>
+        <div><div class="v" id="statPnrs">0</div><div class="k">حجوزات تم إصدارها</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-clock"/></svg></div>
+        <div><div class="v" id="statToday">0</div><div class="k">دخول النهارده</div></div>
+      </div>
+    </div>
+
+    <div class="admin-tools">
+      <div class="search-box">
+        <svg class="ico"><use href="#i-search"/></svg>
+        <input id="logSearch" type="search" placeholder="ابحث بالاسم أو رقم التليفون أو كود الحجز…">
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="log">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>المستخدم</th>
+              <th>الصفة</th>
+              <th>وقت الدخول</th>
+              <th>آخر نشاط</th>
+              <th>الأوامر</th>
+              <th>الحجوزات</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <div class="admin-empty" id="logEmpty">
+        <svg class="ico"><use href="#i-tower"/></svg>
+        <div>لسه محدش دخل السيستيم. أول ما متدرب يسجل دخول هيظهر هنا على طول.</div>
+      </div>
+    </div>
+
+    <div class="admin-note">
+      <svg class="ico"><use href="#i-info"/></svg>
+      <div>سجل الدخول متخزّن في مساحة مشتركة عشان المشرف يشوف كل من دخل السيستيم من أي جهاز، مش جلسة واحدة بس. غيّر كلمة مرور المشرف من ثابت <code>ADMIN_PASSWORD</code> في أول سكربت الأدمن — دي حماية واجهة للتدريب، مش حماية سيرفر حقيقية.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
 <div id="appMain">
 
 <div class="topbar">
   <div class="brand">
-    <div class="logo ige-logo">I.G.E</div>
-    <div class="tag">GDS Reservation Training Simulator</div>
+    <div class="logo"><div class="ige-logo"><svg class="ico solid"><use href="#i-plane"/></svg>I.G.E</div></div>
+    <div class="tag"><svg class="ico"><use href="#i-globe"/></svg>GDS Reservation Training Simulator</div>
   </div>
   <div class="topbar-actions">
-    <button class="tbtn" id="btnHelp">Cheat sheet</button>
-    <button class="tbtn" id="btnNewSession">New session (IG)</button>
-    <button class="tbtn primary" id="btnWipe">Reset all data</button>
+    <button class="tbtn" id="btnHelp"><svg class="ico"><use href="#i-help"/></svg>Cheat sheet</button>
+    <button class="tbtn" id="btnNewSession"><svg class="ico"><use href="#i-refresh"/></svg>New session (IG)</button>
+    <button class="tbtn primary" id="btnWipe"><svg class="ico"><use href="#i-trash"/></svg>Reset all data</button>
   </div>
 </div>
 
 <div class="layout">
 
+  <!-- ROUTE STRIP -->
+  <div class="route-strip">
+    <div class="node">
+      <svg class="ico ico-lg"><use href="#i-pin"/></svg>
+      <div>CAI<small>Cairo</small></div>
+    </div>
+    <div class="route-line"><svg class="ico ico-lg plane solid"><use href="#i-plane"/></svg></div>
+    <div class="node">
+      <svg class="ico ico-lg"><use href="#i-tower"/></svg>
+      <div>LON<small>London</small></div>
+    </div>
+    <div class="meta"><svg class="ico"><use href="#i-suitcase"/></svg>Training route</div>
+    <div class="meta"><svg class="ico"><use href="#i-seat"/></svg>Economy · Y class</div>
+  </div>
+
   <!-- TERMINAL -->
   <div class="terminal-wrap">
     <div class="terminal-head">
-      <span>I.G.E TRAINING TERMINAL — SIGNED IN AS TRAINEE01 — DUTY CODE 96</span>
+      <div class="head-left">
+        <svg class="ico"><use href="#i-tower"/></svg>
+        <span id="termHeadText">I.G.E TRAINING TERMINAL — SIGNED IN AS TRAINEE01 — DUTY CODE 96</span>
+      </div>
       <div class="dots"><span></span><span></span><span></span></div>
     </div>
     <div class="terminal-body" id="termBody"></div>
@@ -443,7 +813,7 @@
       <span class="prompt-caret">›</span>
       <input id="cmdInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
              placeholder="Enter a GDS entry, e.g. AN15AUGCAILON  —  type HE for help">
-      <button class="send-btn" id="btnSend">ENTER</button>
+      <button class="send-btn" id="btnSend"><svg class="ico"><use href="#i-takeoff"/></svg>ENTER</button>
     </div>
   </div>
 
@@ -451,38 +821,297 @@
   <div class="side">
 
     <div class="card">
-      <h3>Booking sequence <span class="n">standard order</span></h3>
+      <h3><svg class="ico ico-lg"><use href="#i-compass"/></svg>Booking sequence <span class="n">standard order</span></h3>
       <ol class="steps">
-        <li>Search flights — <code>AN15AUGCAILON</code></li>
-        <li>Sell a seat — <code>SS1Y1</code></li>
-        <li>Add passenger name — <code>NM1DOE/JOHN MR</code></li>
-        <li>Add contact — <code>AP LON 1234567/P</code></li>
-        <li>Set ticketing arrangement — <code>TKOK</code></li>
-        <li>Add received-from — <code>RF AGENT</code></li>
-        <li>End transaction — <code>ET</code></li>
+        <li><svg class="ico"><use href="#i-search"/></svg>Search flights — <code>AN15AUGCAILON</code></li>
+        <li><svg class="ico"><use href="#i-seat"/></svg>Sell a seat — <code>SS1Y1</code></li>
+        <li><svg class="ico"><use href="#i-passport"/></svg>Add passenger name — <code>NM1DOE/JOHN MR</code></li>
+        <li><svg class="ico"><use href="#i-phone"/></svg>Add contact — <code>AP LON 1234567/P</code></li>
+        <li><svg class="ico"><use href="#i-ticket"/></svg>Set ticketing arrangement — <code>TKOK</code></li>
+        <li><svg class="ico"><use href="#i-user"/></svg>Add received-from — <code>RF AGENT</code></li>
+        <li><svg class="ico"><use href="#i-plane"/></svg>End transaction — <code>ET</code></li>
       </ol>
     </div>
 
     <div class="card">
-      <h3>Live PNR draft</h3>
-      <div id="draftBox"><div class="empty">No active booking yet. Start with an AN availability search.</div></div>
+      <h3><svg class="ico ico-lg"><use href="#i-suitcase"/></svg>Live PNR draft</h3>
+      <div id="draftBox"></div>
     </div>
 
     <div class="card">
-      <h3>Command cheat sheet</h3>
+      <h3><svg class="ico ico-lg"><use href="#i-list"/></svg>Command cheat sheet</h3>
       <div class="cheat-list" id="cheatList"></div>
     </div>
 
     <div class="card">
-      <h3>Saved / ticketed PNRs</h3>
-      <div id="savedBox"><div class="empty">Completed bookings (after ET) will appear here. Click one to retrieve it with RT.</div></div>
+      <h3><svg class="ico ico-lg"><use href="#i-ticket"/></svg>Saved / ticketed PNRs</h3>
+      <div id="savedBox"></div>
     </div>
 
   </div>
 </div>
 
-<footer>I.G.E is an independent training simulator built for classroom use. It is not affiliated with, and does not connect to, Amadeus or any live GDS.</footer>
+<footer>
+  <svg class="ico"><use href="#i-info"/></svg>
+  I.G.E is an independent training simulator built for classroom use. It is not affiliated with, and does not connect to, Amadeus or any live GDS.
+</footer>
 
+</div><!-- /#appMain -->
+
+<!-- ===== ACCESS LOG + ADMIN ===== -->
+<script>
+(function(){
+  "use strict";
+
+  /* ⇩⇩ غيّري كلمة مرور المشرف من هنا ⇩⇩ */
+  const ADMIN_PASSWORD = 'IGE-ADMIN-2026';
+
+  const LOG_KEY = 'ige-access-log';
+  const MAX_ENTRIES = 500;
+
+  let log = [];              // [{id,name,phone,role,loginAt,lastAt,commands,pnrs[]}]
+  let currentId = null;
+  let isAdmin = false;
+  let filter = '';
+
+  /* ---------- storage (shared so the admin sees every device) ---------- */
+  async function loadLog(){
+    try{
+      const res = await window.storage.get(LOG_KEY, true);
+      if(res && res.value){
+        const parsed = JSON.parse(res.value);
+        if(Array.isArray(parsed)) log = parsed;
+      }
+    }catch(e){ /* no entries yet */ }
+    return log;
+  }
+  async function saveLog(){
+    if(log.length > MAX_ENTRIES) log = log.slice(-MAX_ENTRIES);
+    try{ await window.storage.set(LOG_KEY, JSON.stringify(log), true); }
+    catch(e){ /* keep the session running even if storage is unavailable */ }
+  }
+
+  /* ---------- helpers ---------- */
+  function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function fmtTime(ts){
+    if(!ts) return '—';
+    const d = new Date(ts);
+    const p = n => n<10 ? '0'+n : ''+n;
+    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' · '+p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function initials(name){
+    const parts = String(name||'?').trim().split(/\s+/).slice(0,2);
+    return parts.map(p=>p.charAt(0)).join('').toUpperCase() || '?';
+  }
+  function esc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function sameDay(ts){
+    const a = new Date(ts), b = new Date();
+    return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+  }
+
+  /* ---------- public API used by the gate + simulator ---------- */
+  async function startSession(name, phone, role){
+    await loadLog();
+    currentId = newId();
+    log.push({
+      id: currentId,
+      name: name,
+      phone: phone || '',
+      role: role || 'trainee',
+      loginAt: Date.now(),
+      lastAt: Date.now(),
+      commands: 0,
+      pnrs: []
+    });
+    await saveLog();
+    return currentId;
+  }
+  function current(){ return log.find(e=>e.id===currentId) || null; }
+
+  let saveTimer = null;
+  function queueSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{ saveLog(); }, 900);
+  }
+  function bumpCommand(){
+    const e = current();
+    if(!e) return;
+    e.commands++;
+    e.lastAt = Date.now();
+    queueSave();
+  }
+  function recordPnr(locator){
+    const e = current();
+    if(!e) return;
+    if(!e.pnrs.includes(locator)) e.pnrs.push(locator);
+    e.lastAt = Date.now();
+    saveLog();
+  }
+  function removePnr(locator){
+    const e = current();
+    if(!e) return;
+    e.pnrs = e.pnrs.filter(p=>p!==locator);
+    e.lastAt = Date.now();
+    queueSave();
+  }
+
+  /* ---------- admin rendering ---------- */
+  const adminScreen = document.getElementById('adminScreen');
+  const logBody = document.getElementById('logBody');
+  const logEmpty = document.getElementById('logEmpty');
+
+  function visibleRows(){
+    const q = filter.trim().toLowerCase();
+    const rows = log.slice().reverse();
+    if(!q) return rows;
+    return rows.filter(e =>
+      String(e.name).toLowerCase().includes(q) ||
+      String(e.phone).toLowerCase().includes(q) ||
+      e.pnrs.join(' ').toLowerCase().includes(q)
+    );
+  }
+
+  function renderStats(){
+    const people = new Set(log.map(e=> (e.name||'').trim().toLowerCase()+'|'+(e.phone||'').trim()));
+    const pnrCount = log.reduce((n,e)=> n + e.pnrs.length, 0);
+    const today = log.filter(e=> sameDay(e.loginAt)).length;
+    document.getElementById('statSessions').textContent = log.length;
+    document.getElementById('statPeople').textContent = people.size;
+    document.getElementById('statPnrs').textContent = pnrCount;
+    document.getElementById('statToday').textContent = today;
+  }
+
+  function renderTable(){
+    const rows = visibleRows();
+    logBody.innerHTML = '';
+    if(rows.length === 0){
+      logEmpty.style.display = 'flex';
+      logEmpty.querySelector('div').textContent = log.length === 0
+        ? 'لسه محدش دخل السيستيم. أول ما متدرب يسجل دخول هيظهر هنا على طول.'
+        : 'مفيش نتائج مطابقة للبحث. جرّبي اسم أو رقم تاني.';
+      return;
+    }
+    logEmpty.style.display = 'none';
+    rows.forEach((e, i)=>{
+      const tr = document.createElement('tr');
+      const num = rows.length - i;
+      const roleCls = e.role === 'admin' ? 'admin' : 'trainee';
+      const roleIcon = e.role === 'admin' ? 'i-shield' : 'i-passport';
+      const roleTxt = e.role === 'admin' ? 'Admin' : 'Trainee';
+      const pnrs = e.pnrs.length
+        ? e.pnrs.map(p=>`<span class="tag-pnr">${esc(p)}</span>`).join('')
+        : '<span style="color:#c9a9a4">—</span>';
+      tr.innerHTML =
+        `<td class="mono">${num}</td>` +
+        `<td><div class="who-cell"><div class="avatar">${esc(initials(e.name))}</div>` +
+          `<div><div class="nm">${esc(e.name)}</div><div class="sub">${esc(e.phone||'—')}</div></div></div></td>` +
+        `<td><span class="tag-role ${roleCls}"><svg class="ico"><use href="#${roleIcon}"/></svg>${roleTxt}</span></td>` +
+        `<td class="mono">${fmtTime(e.loginAt)}</td>` +
+        `<td class="mono">${fmtTime(e.lastAt)}</td>` +
+        `<td class="mono">${e.commands}</td>` +
+        `<td>${pnrs}</td>`;
+      logBody.appendChild(tr);
+    });
+  }
+
+  async function renderAdmin(){
+    await loadLog();
+    renderStats();
+    renderTable();
+  }
+
+  function openAdmin(){
+    isAdmin = true;
+    document.getElementById('gateScreen').style.display = 'none';
+    document.getElementById('appMain').style.display = 'none';
+    adminScreen.classList.add('show');
+    renderAdmin();
+  }
+  function closeAdmin(){
+    adminScreen.classList.remove('show');
+    if(window.__igeTrainee){
+      document.getElementById('appMain').style.display = 'block';
+    } else {
+      document.getElementById('gateScreen').style.display = 'flex';
+    }
+  }
+
+  function exportCsv(){
+    const head = ['#','Name','Phone','Role','Login','Last activity','Commands','PNRs'];
+    const lines = [head.join(',')];
+    log.slice().reverse().forEach((e,i)=>{
+      const cell = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+      lines.push([
+        log.length - i, cell(e.name), cell(e.phone), cell(e.role),
+        cell(fmtTime(e.loginAt)), cell(fmtTime(e.lastAt)), e.commands, cell(e.pnrs.join(' '))
+      ].join(','));
+    });
+    const blob = new Blob(['\ufeff'+lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ige-access-log.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }
+
+  /* ---------- admin wiring ---------- */
+  document.getElementById('btnAdminRefresh').addEventListener('click', renderAdmin);
+  document.getElementById('btnAdminExport').addEventListener('click', exportCsv);
+  document.getElementById('btnAdminExit').addEventListener('click', closeAdmin);
+  document.getElementById('btnAdminClear').addEventListener('click', async ()=>{
+    if(!confirm('هيتم مسح سجل الدخول بالكامل ومش هينفع يترجع. تكملي؟')) return;
+    log = [];
+    currentId = null;
+    await saveLog();
+    renderStats();
+    renderTable();
+  });
+  document.getElementById('logSearch').addEventListener('input', e=>{
+    filter = e.target.value;
+    renderTable();
+  });
+
+  const adminBox = document.getElementById('adminLoginBox');
+  const adminPass = document.getElementById('adminPass');
+  const adminPassErr = document.getElementById('adminPassErr');
+
+  document.getElementById('btnAdminToggle').addEventListener('click', ()=>{
+    adminBox.classList.toggle('show');
+    if(adminBox.classList.contains('show')) adminPass.focus();
+  });
+  async function tryAdmin(){
+    if(adminPass.value !== ADMIN_PASSWORD){
+      adminPass.classList.add('invalid');
+      adminPassErr.classList.add('show');
+      adminPass.select();
+      return;
+    }
+    adminPass.classList.remove('invalid');
+    adminPassErr.classList.remove('show');
+    adminPass.value = '';
+    await startSession('Administrator','—','admin');
+    openAdmin();
+  }
+  document.getElementById('btnAdminEnter').addEventListener('click', tryAdmin);
+  adminPass.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); tryAdmin(); } });
+  adminPass.addEventListener('input', ()=>{
+    adminPass.classList.remove('invalid');
+    adminPassErr.classList.remove('show');
+  });
+
+  /* expose to the other scripts */
+  window.IGE = { startSession, bumpCommand, recordPnr, removePnr, openAdmin, loadLog, isAdmin: ()=>isAdmin };
+
+  loadLog();
+})();
+</script>
+
+<!-- ===== SIMULATOR ===== -->
 <script>
 (function(){
   "use strict";
@@ -515,24 +1144,28 @@
   ];
 
   /* ---------------- state ---------------- */
-  let availability = [];      // current AN result set
+  let availability = [];
   let draft = emptyDraft();
-  let directory = {};         // locator -> saved pnr object (persisted)
+  let directory = {};
 
   function emptyDraft(){
     return { segments:[], names:[], contacts:[], tk:null, rf:null, locator:null, priced:null };
   }
 
+  function icon(id, extra){
+    return '<svg class="ico'+(extra?' '+extra:'')+'"><use href="#'+id+'"/></svg>';
+  }
+
   /* ---------------- storage ---------------- */
-  function loadDirectory(){
+  async function loadDirectory(){
     try{
-      const raw = localStorage.getItem('ige-pnr-directory');
-      if(raw){ directory = JSON.parse(raw); }
+      const res = await window.storage.get('pnr-directory', false);
+      if(res && res.value){ directory = JSON.parse(res.value); }
     }catch(e){ directory = {}; }
     renderSaved();
   }
-  function saveDirectory(){
-    try{ localStorage.setItem('ige-pnr-directory', JSON.stringify(directory)); }
+  async function saveDirectory(){
+    try{ await window.storage.set('pnr-directory', JSON.stringify(directory), false); }
     catch(e){ /* non-fatal in a training tool */ }
   }
 
@@ -554,7 +1187,6 @@
   }
 
   /* ---------------- helpers ---------------- */
-  const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   function pad(n){return n<10?'0'+n:''+n;}
   function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
   function randLocator(){
@@ -564,7 +1196,6 @@
     return s;
   }
   function weekdayCode(dateStr){
-    // dateStr like 15AUG - just fake a weekday number 1-7 deterministically-ish
     let h=0; for(const c of dateStr) h+=c.charCodeAt(0);
     return (h%7)+1;
   }
@@ -600,13 +1231,29 @@
     const clsStr = Object.entries(r.classes).map(([c,n])=> c + (n>0? n : 'C0')).join(' ');
     return `${String(r.line).padEnd(2)} ${r.carrier} ${String(r.flightNo).padEnd(4)} ${clsStr.padEnd(13)} ${r.date} ${r.day}  ${r.origin}${r.dest}  ${r.dep} ${r.arr}  E0/${r.aircraft}`;
   }
-
   function fmtSegRow(idx, seg){
     return `${String(idx).padEnd(2)} ${seg.carrier} ${String(seg.flightNo).padEnd(4)} ${seg.bookedClass}  ${seg.date} ${seg.day}  ${seg.origin}${seg.dest}  HK${seg.paxCount}  ${seg.dep} ${seg.arr}  E0/${seg.aircraft}`;
   }
-
   function fmtNameRow(idx, nm){
     return `${idx}. ${nm.surname}/${nm.given}${nm.title? ' '+nm.title : ''}`;
+  }
+
+  /* ---------------- route strip sync ---------------- */
+  const CITIES = {
+    CAI:'Cairo', LON:'London', DXB:'Dubai', JED:'Jeddah', RUH:'Riyadh', AUH:'Abu Dhabi',
+    DOH:'Doha', IST:'Istanbul', CDG:'Paris', FRA:'Frankfurt', MUC:'Munich', ZRH:'Zurich',
+    JFK:'New York', LAX:'Los Angeles', HRG:'Hurghada', SSH:'Sharm El Sheikh', LXR:'Luxor',
+    ASW:'Aswan', ATH:'Athens', ROM:'Rome', MAD:'Madrid', AMS:'Amsterdam', KWI:'Kuwait',
+    BEY:'Beirut', AMM:'Amman', TUN:'Tunis', CMN:'Casablanca', NBO:'Nairobi'
+  };
+  function updateRouteStrip(origin, dest){
+    const nodes = document.querySelectorAll('.route-strip .node div');
+    if(nodes.length < 2) return;
+    [[nodes[0], origin],[nodes[1], dest]].forEach(([el, code])=>{
+      el.childNodes[0].nodeValue = code;
+      const small = el.querySelector('small');
+      if(small) small.textContent = CITIES[code] || 'Airport';
+    });
   }
 
   /* ---------------- command handlers ---------------- */
@@ -615,6 +1262,7 @@
     if(!m){ print('INVALID FORMAT — EXPECTED: AN<DDMMM><ORG><DST>  e.g. AN15AUGCAILON','err'); return; }
     const [, dateStr, origin, dest] = m;
     availability = generateAvailability(dateStr, origin, dest);
+    updateRouteStrip(origin, dest);
     banner('AVAILABILITY — AN');
     print(`${dateStr}  ${origin} > ${dest}`, 'sys');
     availability.forEach(r=> print(fmtAvailRow(r)));
@@ -694,6 +1342,7 @@
     print(`FARE  USD ${base.toFixed(2)}`);
     print(`TAX   USD ${tax.toFixed(2)}`);
     print(`TOTAL USD ${(base+tax).toFixed(2)}`,'ok');
+    renderDraft();
   }
 
   function cmd_FXR(){
@@ -704,8 +1353,7 @@
     draft.segments.forEach((seg, i)=>{
       const base = 90 + (i+1)*35 + Math.floor(Math.random()*120);
       const tax = Math.round(base*0.16);
-      const lineTotal = base+tax;
-      grandTotal += lineTotal;
+      grandTotal += base+tax;
       print(`SEG ${i+1}  ${seg.carrier}${seg.flightNo} ${seg.bookedClass}  ${seg.origin}${seg.dest} ${seg.date}   FARE ${base.toFixed(2)}  TAX ${tax.toFixed(2)}`);
     });
     printRule();
@@ -726,6 +1374,7 @@
       if(!directory[loc]){ print('RECORD LOCATOR NOT FOUND: '+loc,'err'); return; }
       delete directory[loc];
       saveDirectory();
+      if(window.IGE) window.IGE.removePnr(loc);
       if(draft.locator===loc){ draft = emptyDraft(); }
       print('PNR '+loc+' CANCELLED AND REMOVED','warn');
       renderSaved();
@@ -738,6 +1387,7 @@
     if(hadLocator && directory[hadLocator]){
       delete directory[hadLocator];
       saveDirectory();
+      if(window.IGE) window.IGE.removePnr(hadLocator);
     }
     draft = emptyDraft();
     print(hadLocator ? 'PNR '+hadLocator+' CANCELLED — ALL ELEMENTS REMOVED' : 'ACTIVE PNR CANCELLED — ALL ELEMENTS REMOVED', 'warn');
@@ -764,8 +1414,8 @@
     }
     if(!draft.locator) draft.locator = randLocator();
     directory[draft.locator] = JSON.parse(JSON.stringify(draft));
-    saveDirectory();
-    if(typeof window.igeSaveBooking === 'function'){ window.igeSaveBooking(directory[draft.locator]); }
+    await saveDirectory();
+    if(window.IGE) window.IGE.recordPnr(draft.locator);
     banner('END TRANSACTION — ET');
     print('PNR CREATED SUCCESSFULLY','ok');
     print('RECORD LOCATOR: '+draft.locator,'ok');
@@ -825,29 +1475,35 @@
   function renderDraft(){
     const box = document.getElementById('draftBox');
     const hasAny = draft.names.length||draft.segments.length||draft.contacts.length||draft.tk||draft.rf;
-    if(!hasAny){ box.innerHTML = '<div class="empty">No active booking yet. Start with an AN availability search.</div>'; return; }
+    if(!hasAny){
+      box.innerHTML = '<div class="empty">'+icon('i-compass')+'No active booking yet. Start with an AN availability search.</div>';
+      return;
+    }
     let html='';
-    if(draft.locator){ html += `<span class="pill locator">${draft.locator}</span><br/>`; }
-    draft.names.forEach(nm=>{ html += `<span class="pill name">${nm.surname}/${nm.given}${nm.title?' '+nm.title:''}</span>`; });
-    draft.segments.forEach(seg=>{ html += `<span class="pill seg">${seg.carrier}${seg.flightNo} ${seg.origin}${seg.dest} ${seg.date}</span>`; });
-    draft.contacts.forEach(c=>{ html += `<span class="pill contact">${c.type}: ${c.value}</span>`; });
-    html += `<div class="draft-row">TK: ${draft.tk? 'TK'+draft.tk.code+draft.tk.detail : '—'}</div>`;
-    html += `<div class="draft-row">RF: ${draft.rf || '—'}</div>`;
-    if(draft.priced){ html += `<div class="draft-row">Priced total: USD ${draft.priced.total.toFixed(2)}</div>`; }
+    if(draft.locator){ html += `<span class="pill locator">${icon('i-ticket')}${draft.locator}</span><br/>`; }
+    draft.names.forEach(nm=>{ html += `<span class="pill name">${icon('i-passport')}${nm.surname}/${nm.given}${nm.title?' '+nm.title:''}</span>`; });
+    draft.segments.forEach(seg=>{ html += `<span class="pill seg">${icon('i-plane','solid')}${seg.carrier}${seg.flightNo} ${seg.origin}→${seg.dest} ${seg.date}</span>`; });
+    draft.contacts.forEach(c=>{ html += `<span class="pill contact">${icon(c.type==='EMAIL'?'i-list':'i-phone')}${c.value}</span>`; });
+    html += `<div class="draft-row">${icon('i-ticket')}TK: ${draft.tk? 'TK'+draft.tk.code+draft.tk.detail : '—'}</div>`;
+    html += `<div class="draft-row">${icon('i-user')}RF: ${draft.rf || '—'}</div>`;
+    if(draft.priced){ html += `<div class="draft-row">${icon('i-suitcase')}Priced total: USD ${draft.priced.total.toFixed(2)}</div>`; }
     box.innerHTML = html;
   }
 
   function renderSaved(){
     const box = document.getElementById('savedBox');
     const keys = Object.keys(directory);
-    if(keys.length===0){ box.innerHTML = '<div class="empty">Completed bookings (after ET) will appear here. Click one to retrieve it with RT.</div>'; return; }
+    if(keys.length===0){
+      box.innerHTML = '<div class="empty">'+icon('i-suitcase')+'Completed bookings (after ET) will appear here. Click one to retrieve it with RT.</div>';
+      return;
+    }
     box.innerHTML='';
     keys.slice().reverse().forEach(loc=>{
       const p = directory[loc];
       const who = p.names.length ? p.names[0].surname+'/'+p.names[0].given : 'NO NAME';
       const div = document.createElement('div');
       div.className='saved-item';
-      div.innerHTML = `<span class="loc">${loc}</span><span class="who">${who}${p.names.length>1?' +'+(p.names.length-1):''}</span>`;
+      div.innerHTML = `<span class="loc">${icon('i-ticket')}${loc}</span><span class="who">${who}${p.names.length>1?' +'+(p.names.length-1):''}</span>`;
       div.onclick = ()=>{ runCommand('RT '+loc); document.getElementById('cmdInput').focus(); };
       box.appendChild(div);
     });
@@ -874,6 +1530,7 @@
     const line = raw.trim();
     if(!line) return;
     printEcho(line.toUpperCase());
+    if(window.IGE) window.IGE.bumpCommand();
     const upper = line.toUpperCase();
 
     if(/^AN/.test(upper)) return cmd_AN(upper.slice(2));
@@ -896,6 +1553,7 @@
 
     print('UNABLE TO PROCESS — INVALID ENTRY. TYPE HE FOR HELP.','err');
   }
+  window.__igeRunCommand = runCommand;
 
   /* ---------------- boot ---------------- */
   function boot(){
@@ -924,7 +1582,7 @@
   document.getElementById('btnWipe').addEventListener('click', async ()=>{
     if(!confirm('This clears all saved PNRs from storage for this simulator. Continue?')) return;
     directory = {};
-    try{ localStorage.removeItem('ige-pnr-directory'); }catch(e){}
+    try{ await window.storage.set('pnr-directory','{}',false); }catch(e){}
     draft = emptyDraft();
     availability = [];
     termBody.innerHTML='';
@@ -935,8 +1593,7 @@
 })();
 </script>
 
-</div><!-- /#appMain -->
-
+<!-- ===== GATE ===== -->
 <script>
 (function(){
   "use strict";
@@ -950,12 +1607,10 @@
 
   function isValidName(v){
     const s = v.trim();
-    // at least 2 characters, letters (Arabic or Latin) and spaces only
     return /^[\u0600-\u06FFA-Za-z\s'-]{2,}$/.test(s);
   }
   function isValidPhone(v){
     const s = v.trim().replace(/[\s-]/g,'');
-    // digits only (optionally leading +), 8 to 15 digits
     return /^\+?\d{8,15}$/.test(s);
   }
 
@@ -969,7 +1624,7 @@
     }
   }
 
-  function trySubmit(e){
+  async function trySubmit(e){
     if(e) e.preventDefault();
     const nameOk = isValidName(nameInput.value);
     const phoneOk = isValidPhone(phoneInput.value);
@@ -981,14 +1636,19 @@
     }
     const traineeName = nameInput.value.trim();
     const traineePhone = phoneInput.value.trim();
+
+    window.__igeTrainee = {name:traineeName, phone:traineePhone};
     try{
-      window.__igeTrainee = {name:traineeName, phone:traineePhone};
-      const headEl = document.querySelector('.terminal-head span');
+      const headEl = document.getElementById('termHeadText');
       if(headEl){
         headEl.textContent = 'I.G.E TRAINING TERMINAL — SIGNED IN AS ' + traineeName.toUpperCase() + ' — DUTY CODE 96';
       }
-      if(typeof window.igeSaveTrainee === 'function'){ window.igeSaveTrainee(traineeName, traineePhone); }
     }catch(err){}
+
+    if(window.IGE){
+      try{ await window.IGE.startSession(traineeName, traineePhone, 'trainee'); }catch(err){}
+    }
+
     gateScreen.style.display = 'none';
     appMain.style.display = 'block';
     const cmdInput = document.getElementById('cmdInput');
