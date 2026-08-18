@@ -792,6 +792,65 @@
   }
   .print-btn.ghost:hover{background:var(--panel-bg);}
 
+  .activity-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:9px;overflow:hidden;
+  }
+  .act-head{
+    display:flex;align-items:center;gap:8px;
+    padding:9px 13px;background:var(--panel-bg);border-bottom:1px solid var(--line);
+    font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--brand-deep);
+  }
+  .act-head .ico{font-size:14px;}
+  .act-head .cnt{
+    margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;
+    background:#fff1e6;color:#8a5b0a;padding:2px 8px;border-radius:20px;letter-spacing:0;
+  }
+  .act-scroll{max-height:320px;overflow:auto;}
+  table.act{width:100%;border-collapse:collapse;min-width:600px;}
+  table.act th{
+    position:sticky;top:0;
+    text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.9px;
+    color:var(--ink-soft);background:#fffaf9;
+    padding:7px 11px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.act td{
+    padding:7px 11px;border-bottom:1px solid #f7ecea;
+    font-size:11.5px;color:var(--ink-soft);vertical-align:top;
+  }
+  table.act td.mono{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;}
+  table.act td .dim{color:#c9a9a4;}
+  table.act tr:last-child td{border-bottom:none;}
+  table.act tr.err td{background:#fff5f4;}
+  table.act tr.ok  td{background:#f7fdf9;}
+  table.act tr.warn td{background:#fffbf2;}
+  .ev-tag{
+    display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+    font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  }
+  .ev-tag .ico{font-size:12px;}
+  .ev-login{background:#e8eefb;color:#2c4a86;}
+  .ev-cmd{background:#f2eef7;color:#5b4380;}
+  .ev-pnr{background:#dcf5e8;color:#1f6b4a;}
+  .ev-tkt{background:#fff1e6;color:#8a5b0a;}
+  .ev-cancel{background:#fbe4e0;color:var(--brand-deep);}
+  .ev-nav{background:#eef0f2;color:#5a6570;}
+
+  .storage-note{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--ink-soft);
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;
+  }
+  .storage-note .dot{
+    width:8px;height:8px;border-radius:50%;background:#2f7d5b;flex:none;
+  }
+  .storage-note .dot.warn{background:var(--amber);}
+  .storage-note code{
+    font-family:var(--mono);font-size:10.5px;background:var(--panel-bg);
+    padding:1px 6px;border-radius:4px;color:var(--brand-deep);
+  }
+
   .admin-empty{
     display:flex;flex-direction:column;align-items:center;gap:10px;
     padding:48px 20px;color:#b08d88;font-size:13px;text-align:center;
@@ -950,7 +1009,8 @@
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="tbtn admin" id="btnAdminRefresh"><svg class="ico"><use href="#i-refresh"/></svg>تحديث</button>
-      <button class="tbtn admin" id="btnAdminExport"><svg class="ico"><use href="#i-download"/></svg>تصدير CSV</button>
+      <button class="tbtn admin" id="btnAdminExport"><svg class="ico"><use href="#i-download"/></svg>تصدير الحجوزات</button>
+      <button class="tbtn admin" id="btnAdminExportLog"><svg class="ico"><use href="#i-log"/></svg>تصدير سجل النشاط</button>
       <button class="tbtn primary" id="btnAdminClear"><svg class="ico"><use href="#i-trash"/></svg>مسح السجل</button>
       <button class="tbtn" id="btnAdminExit"><svg class="ico"><use href="#i-exit"/></svg>خروج</button>
     </div>
@@ -971,10 +1031,16 @@
         <div><div class="v" id="statPnrs">0</div><div class="k">حجوزات تم إصدارها</div></div>
       </div>
       <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-log"/></svg></div>
+        <div><div class="v" id="statEvents">0</div><div class="k">أحداث مسجّلة</div></div>
+      </div>
+      <div class="stat">
         <div class="badge"><svg class="ico"><use href="#i-clock"/></svg></div>
         <div><div class="v" id="statToday">0</div><div class="k">دخول النهارده</div></div>
       </div>
     </div>
+
+    <div class="storage-note" id="storageNote"></div>
 
     <div class="admin-tools">
       <div class="search-box">
@@ -1119,6 +1185,95 @@
   </div>
   <div class="ticket-scroll"><div id="ticketSheet"></div></div>
 </div>
+
+<!-- ===== STORAGE ADAPTER ===== -->
+<script>
+/* window.storage only exists inside the Claude preview. When this file is hosted
+   or opened directly, fall back to localStorage, then to memory, so the log still
+   records instead of failing silently. */
+window.IGEStore = (function(){
+  "use strict";
+  const mem = Object.create(null);
+  const LP = 'ige::';
+
+  const hasNative = (function(){
+    try{ return !!(window.storage && typeof window.storage.get === 'function'); }
+    catch(e){ return false; }
+  })();
+  const hasLocal = (function(){
+    try{
+      const k = '__ige_probe';
+      window.localStorage.setItem(k,'1');
+      window.localStorage.removeItem(k);
+      return true;
+    }catch(e){ return false; }
+  })();
+
+  const backend = hasNative ? 'native' : (hasLocal ? 'local' : 'memory');
+  const lk = (key, shared) => LP + (shared ? 's::' : 'p::') + key;
+
+  async function get(key, shared){
+    try{
+      if(backend === 'native'){
+        const r = await window.storage.get(key, !!shared);
+        return (r && r.value != null) ? r.value : null;
+      }
+      if(backend === 'local') return window.localStorage.getItem(lk(key, shared));
+      const v = mem[lk(key, shared)];
+      return v == null ? null : v;
+    }catch(e){ return null; }
+  }
+
+  async function set(key, value, shared){
+    try{
+      if(backend === 'native'){ await window.storage.set(key, value, !!shared); return true; }
+      if(backend === 'local'){ window.localStorage.setItem(lk(key, shared), value); return true; }
+      mem[lk(key, shared)] = value;
+      return true;
+    }catch(e){ return false; }
+  }
+
+  async function del(key, shared){
+    try{
+      if(backend === 'native'){ await window.storage.delete(key, !!shared); return true; }
+      if(backend === 'local'){ window.localStorage.removeItem(lk(key, shared)); return true; }
+      delete mem[lk(key, shared)];
+      return true;
+    }catch(e){ return false; }
+  }
+
+  async function list(prefix, shared){
+    const pre = prefix || '';
+    try{
+      if(backend === 'native'){
+        const r = await window.storage.list(pre, !!shared);
+        const raw = (r && r.keys) ? r.keys : [];
+        return raw
+          .map(k => typeof k === 'string' ? k : (k && (k.key || k.name)) || '')
+          .filter(k => k && k.indexOf(pre) === 0);
+      }
+      const head = LP + (shared ? 's::' : 'p::');
+      let full;
+      if(backend === 'local'){
+        full = [];
+        const ls = window.localStorage;
+        for(let i=0; i<ls.length; i++){
+          const k = ls.key(i);
+          if(k) full.push(k);
+        }
+      } else {
+        full = Object.keys(mem);
+      }
+      return full
+        .filter(k => k.indexOf(head) === 0)
+        .map(k => k.slice(head.length))
+        .filter(k => k.indexOf(pre) === 0);
+    }catch(e){ return []; }
+  }
+
+  return { get, set, delete:del, list, backend };
+})();
+</script>
 
 <!-- ===== TICKET ENGINE ===== -->
 <script>
@@ -1473,15 +1628,10 @@ window.IGETicket = (function(){
   }
 
   /* ---------- storage: one shared key per session ---------- */
+  const S = window.IGEStore;
+
   async function sessionKeys(){
-    let keys = [];
-    try{
-      const res = await window.storage.list(SESSION_PREFIX, true);
-      const raw = (res && res.keys) ? res.keys : [];
-      keys = raw
-        .map(k => typeof k === 'string' ? k : (k && (k.key || k.name)) || '')
-        .filter(k => k && k.indexOf(SESSION_PREFIX) === 0);
-    }catch(e){ /* nothing stored yet */ }
+    let keys = await S.list(SESSION_PREFIX, true);
     keys.sort();
     if(keys.length > MAX_ENTRIES) keys = keys.slice(-MAX_ENTRIES);
     return keys;
@@ -1495,27 +1645,26 @@ window.IGETicket = (function(){
     for(let i=0; i<keys.length; i+=8){
       const batch = keys.slice(i, i+8);
       const got = await Promise.all(batch.map(async k=>{
-        try{
-          const r = await window.storage.get(k, true);
-          return (r && r.value) ? JSON.parse(r.value) : null;
-        }catch(e){ return null; }
+        const raw = await S.get(k, true);
+        if(!raw) return null;
+        try{ return JSON.parse(raw); }catch(e){ return null; }
       }));
       got.forEach(v=>{ const n = normalise(v); if(n) found.push(n); });
     }
 
     // anything saved by the older single-blob version
-    try{
-      const r = await window.storage.get(LEGACY_KEY, true);
-      if(r && r.value){
-        const arr = JSON.parse(r.value);
+    const legacy = await S.get(LEGACY_KEY, true);
+    if(legacy){
+      try{
+        const arr = JSON.parse(legacy);
         if(Array.isArray(arr)){
           arr.filter(e=>e && e.role !== 'admin').forEach(v=>{
             const n = normalise(v);
             if(n && !found.some(f=>f.id === n.id)) found.push(n);
           });
         }
-      }
-    }catch(e){ /* no legacy data */ }
+      }catch(e){ /* unreadable legacy blob */ }
+    }
 
     // keep this device's live session visible even before its first write lands
     if(entry && !found.some(f=>f.id === entry.id)) found.push(entry);
@@ -1527,11 +1676,38 @@ window.IGETicket = (function(){
 
   async function saveEntry(){
     if(!entry || !entryKey) return;
-    try{ await window.storage.set(entryKey, JSON.stringify(entry), true); }
-    catch(e){ /* keep the session running even if storage is unavailable */ }
+    await S.set(entryKey, JSON.stringify(entry), true);
   }
 
   /* ---------- public API used by the gate + simulator ---------- */
+  const MAX_EVENTS = 300;
+
+  function pushEvent(kind, text, level, cmd){
+    if(!entry) return;
+    if(!Array.isArray(entry.events)) entry.events = [];
+    entry.events.push({
+      t: Date.now(),
+      k: kind,                       // login | cmd | pnr | ticket | cancel | reset | nav
+      c: cmd || '',
+      m: String(text||'').slice(0,240),
+      s: level || 'info'             // ok | err | warn | info
+    });
+    if(entry.events.length > MAX_EVENTS) entry.events = entry.events.slice(-MAX_EVENTS);
+    entry.lastAt = Date.now();
+  }
+
+  /* anything the simulator wants on the record */
+  function logEvent(kind, text, level, cmd){
+    if(!entry) return;
+    pushEvent(kind, text, level, cmd);
+    queueSave();
+  }
+  function logEventNow(kind, text, level, cmd){
+    if(!entry) return;
+    pushEvent(kind, text, level, cmd);
+    saveEntry();
+  }
+
   async function startSession(name, phone){
     const id = newId();
     entry = {
@@ -1541,9 +1717,12 @@ window.IGETicket = (function(){
       loginAt: Date.now(),
       lastAt: Date.now(),
       commands: 0,
-      bookings: []       // full PNR snapshots confirmed by this person
+      bookings: [],      // full PNR snapshots confirmed by this person
+      events: [],        // everything this person did, in order
+      agent: (navigator.userAgent||'').slice(0,120)
     };
     entryKey = SESSION_PREFIX + id;
+    pushEvent('login', 'تسجيل دخول — ' + name + ' · ' + (phone||'—'), 'ok');
     await saveEntry();   // the login itself is recorded straight away
     return id;
   }
@@ -1552,12 +1731,13 @@ window.IGETicket = (function(){
   let saveTimer = null;
   function queueSave(){
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveEntry, 900);
+    saveTimer = setTimeout(saveEntry, 700);
   }
-  function bumpCommand(){
+  /* every entry typed into the terminal, with the reply it produced */
+  function bumpCommand(cmd, reply, level){
     if(!entry) return;
     entry.commands++;
-    entry.lastAt = Date.now();
+    pushEvent('cmd', reply || '', level || 'info', cmd || '');
     queueSave();
   }
   /* snapshot = {locator,names,segments,contacts,tk,rf,total} */
@@ -1568,15 +1748,15 @@ window.IGETicket = (function(){
     const at = entry.bookings.findIndex(b=>b.locator===snapshot.locator);
     if(at >= 0) entry.bookings[at] = stamped;      // re-ended PNR — keep the latest state
     else entry.bookings.push(stamped);
-    entry.lastAt = Date.now();
+    const pax = (snapshot.names||[]).length, seg = (snapshot.segments||[]).length;
+    pushEvent('pnr', 'تأكيد حجز ' + snapshot.locator + ' · ' + pax + ' راكب · ' + seg + ' رحلة', 'ok');
     saveEntry();
   }
   function removePnr(locator){
-    const e = current();
-    if(!e || !Array.isArray(e.bookings)) return;
-    e.bookings = e.bookings.filter(b=>b.locator!==locator);
-    e.lastAt = Date.now();
-    queueSave();
+    if(!entry || !Array.isArray(entry.bookings)) return;
+    entry.bookings = entry.bookings.filter(b=>b.locator!==locator);
+    pushEvent('cancel', 'إلغاء الحجز ' + locator, 'warn');
+    saveEntry();
   }
 
   /* ---------- admin rendering ---------- */
@@ -1597,18 +1777,33 @@ window.IGETicket = (function(){
         String(b.locator).toLowerCase().includes(q) ||
         (b.names||[]).some(n=> (n.surname+' '+n.given).toLowerCase().includes(q)) ||
         (b.segments||[]).some(s=> (s.carrier+s.flightNo+' '+s.origin+s.dest).toLowerCase().includes(q))
-      )
+      ) ||
+      (e.events||[]).some(v => (String(v.c)+' '+String(v.m)).toLowerCase().includes(q))
     );
   }
 
   function renderStats(){
     const people = new Set(log.map(e=> (e.name||'').trim().toLowerCase()+'|'+(e.phone||'').trim()));
     const pnrCount = log.reduce((n,e)=> n + bookingsOf(e).length, 0);
+    const evCount = log.reduce((n,e)=> n + (Array.isArray(e.events)? e.events.length : 0), 0);
     const today = log.filter(e=> sameDay(e.loginAt)).length;
     document.getElementById('statSessions').textContent = log.length;
     document.getElementById('statPeople').textContent = people.size;
     document.getElementById('statPnrs').textContent = pnrCount;
+    document.getElementById('statEvents').textContent = evCount;
     document.getElementById('statToday').textContent = today;
+
+    const note = document.getElementById('storageNote');
+    if(note){
+      const b = S.backend;
+      const desc = b === 'native'
+        ? 'التخزين المشترك شغّال — كل الأجهزة اللي بتفتح نفس الرابط بتظهر هنا.'
+        : (b === 'local'
+            ? 'التخزين محلي على هذا المتصفح — هيسجّل ويفضل محفوظ بعد قفل الصفحة، لكن المتدربين اللي على أجهزة تانية مش هيظهروا هنا إلا لو فتحوا نفس المتصفح.'
+            : 'المتصفح مانع التخزين — التسجيل شغّال في الذاكرة بس وهيضيع مع قفل الصفحة. جرّبي متصفح تاني أو اطلعي من وضع التصفح الخفي.');
+      note.innerHTML = `<span class="dot${b==='native'?'':' warn'}"></span>` +
+        `<span>وضع التخزين: <code>${esc(b)}</code></span><span>${esc(desc)}</span>`;
+    }
   }
 
   function ico(id){ return '<svg class="ico"><use href="#'+id+'"/></svg>'; }
@@ -1659,6 +1854,42 @@ window.IGETicket = (function(){
     </div>`;
   }
 
+  const EVENT_META = {
+    login:  {i:'i-user',     t:'دخول',   c:'ev-login'},
+    cmd:    {i:'i-list',     t:'أمر',     c:'ev-cmd'},
+    pnr:    {i:'i-ticket',   t:'حجز',    c:'ev-pnr'},
+    ticket: {i:'i-download', t:'تذكرة',  c:'ev-tkt'},
+    cancel: {i:'i-trash',    t:'إلغاء',  c:'ev-cancel'},
+    reset:  {i:'i-refresh',  t:'مسح',    c:'ev-cancel'},
+    nav:    {i:'i-compass',  t:'تصفح',   c:'ev-nav'}
+  };
+
+  function activityBlock(e){
+    const evs = Array.isArray(e.events) ? e.events : [];
+    if(!evs.length){
+      return `<div class="activity-card"><div class="act-head">${ico('i-log')}سجل النشاط</div>
+        <div class="no-bookings">${ico('i-info')}مفيش نشاط مسجّل للجلسة دي.</div></div>`;
+    }
+    const rows = evs.slice().reverse().map(v=>{
+      const meta = EVENT_META[v.k] || EVENT_META.nav;
+      return `<tr class="${esc(v.s||'info')}">
+        <td class="mono">${fmtTime(v.t)}</td>
+        <td><span class="ev-tag ${meta.c}">${ico(meta.i)}${meta.t}</span></td>
+        <td class="mono">${v.c ? esc(v.c) : '<span class="dim">—</span>'}</td>
+        <td>${esc(v.m||'')}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="activity-card">
+      <div class="act-head">${ico('i-log')}سجل النشاط <span class="cnt">${evs.length} حدث</span></div>
+      <div class="act-scroll">
+        <table class="act">
+          <thead><tr><th>الوقت</th><th>النوع</th><th>الأمر</th><th>النتيجة</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
   function renderTable(){
     const rows = visibleRows();
     logBody.innerHTML = '';
@@ -1695,7 +1926,7 @@ window.IGETicket = (function(){
         bks.length
           ? bks.slice().reverse().map(bookingCard).join('')
           : `<div class="no-bookings">${ico('i-suitcase')}الشخص ده سجّل دخول بس لسه مأكدش أي حجز.</div>`
-      }</div></td>`;
+      }${activityBlock(e)}</div></td>`;
 
       tr.addEventListener('click', ()=>{
         const open = detail.style.display !== 'none';
@@ -1783,17 +2014,42 @@ window.IGETicket = (function(){
     setTimeout(()=>URL.revokeObjectURL(url), 500);
   }
 
+  function download(name, text){
+    const blob = new Blob(['\ufeff'+text], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }
+
+  function exportActivityCsv(){
+    const cell = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+    const lines = [['Time','Name','Phone','Type','Command','Result','Status'].join(',')];
+    log.slice().reverse().forEach(e=>{
+      (e.events||[]).slice().reverse().forEach(v=>{
+        const meta = EVENT_META[v.k] || EVENT_META.nav;
+        lines.push([
+          cell(fmtTime(v.t)), cell(e.name), cell(e.phone),
+          cell(meta.t), cell(v.c||''), cell(v.m||''), cell(v.s||'')
+        ].join(','));
+      });
+    });
+    download('ige-activity-log.csv', lines.join('\n'));
+  }
+
   /* ---------- admin wiring ---------- */
   document.getElementById('btnAdminRefresh').addEventListener('click', renderAdmin);
   document.getElementById('btnAdminExport').addEventListener('click', exportCsv);
+  document.getElementById('btnAdminExportLog').addEventListener('click', exportActivityCsv);
   document.getElementById('btnAdminExit').addEventListener('click', closeAdmin);
   document.getElementById('btnAdminClear').addEventListener('click', async ()=>{
     if(!confirm('هيتم مسح سجل الدخول بالكامل ومش هينفع يترجع. تكملي؟')) return;
     const keys = await sessionKeys();
     for(const k of keys){
-      try{ await window.storage.delete(k, true); }catch(e){}
+      await S.delete(k, true);
     }
-    try{ await window.storage.delete(LEGACY_KEY, true); }catch(e){}
+    await S.delete(LEGACY_KEY, true);
     entry = null; entryKey = null;
     log = [];
     renderStats();
@@ -1832,7 +2088,7 @@ window.IGETicket = (function(){
   });
 
   /* expose to the other scripts */
-  window.IGE = { startSession, bumpCommand, recordPnr, removePnr, openAdmin, loadLog, isAdmin: ()=>isAdmin };
+  window.IGE = { startSession, bumpCommand, recordPnr, removePnr, logEvent, logEventNow, openAdmin, loadLog, isAdmin: ()=>isAdmin };
 
   loadLog();
 })();
@@ -1887,24 +2143,23 @@ window.IGETicket = (function(){
 
   /* ---------------- storage ---------------- */
   async function loadDirectory(){
-    try{
-      const res = await window.storage.get('pnr-directory', false);
-      if(res && res.value){ directory = JSON.parse(res.value); }
-    }catch(e){ directory = {}; }
+    const raw = await window.IGEStore.get('pnr-directory', false);
+    if(raw){ try{ directory = JSON.parse(raw); }catch(e){ directory = {}; } }
     renderSaved();
   }
   async function saveDirectory(){
-    try{ await window.storage.set('pnr-directory', JSON.stringify(directory), false); }
-    catch(e){ /* non-fatal in a training tool */ }
+    await window.IGEStore.set('pnr-directory', JSON.stringify(directory), false);
   }
 
   /* ---------------- terminal rendering ---------------- */
   const termBody = document.getElementById('termBody');
+  let capture = null;              // collects the reply while a command runs
   function print(text, cls){
     const div = document.createElement('div');
     div.className = 'row' + (cls ? ' '+cls : '');
     div.textContent = text;
     termBody.appendChild(div);
+    if(capture && cls !== 'rule' && cls !== 'echo') capture.push({text:text, cls:cls||''});
   }
   function printEcho(text){ print(text, 'echo'); }
   function printRule(){ print('─'.repeat(62), 'rule'); }
@@ -2210,6 +2465,9 @@ window.IGETicket = (function(){
     t.tickets.forEach((k,i)=> print('OK ETICKET '+String(i+1).padStart(2,'0')+'  '+k.number+'  '+k.name,'ok'));
     print('TOTAL USD '+(t.paxTotal*t.paxCount).toFixed(2)+'  FOP CASH  '+t.officeId);
     print('OPENING PRINT VIEW — CHOOSE "SAVE AS PDF" IN THE PRINT DIALOG','sys');
+    if(window.IGE){
+      window.IGE.logEventNow('ticket','إصدار تذاكر الحجز '+loc+' — '+t.tickets.map(k=>k.number).join(' , '),'ok');
+    }
     window.IGETicket.open(ticketPayload(pnr));
   }
 
@@ -2251,7 +2509,10 @@ window.IGETicket = (function(){
       btn.className = 'print-btn';
       btn.style.marginTop = '8px';
       btn.innerHTML = icon('i-download') + 'طباعة التذكرة (PDF)';
-      btn.onclick = ()=> window.IGETicket.open(ticketPayload(directory[draft.locator]));
+      btn.onclick = ()=>{
+        if(window.IGE) window.IGE.logEvent('ticket','فتح/طباعة تذكرة الحجز '+draft.locator,'ok');
+        window.IGETicket.open(ticketPayload(directory[draft.locator]));
+      };
       box.appendChild(btn);
     }
   }
@@ -2289,7 +2550,11 @@ window.IGETicket = (function(){
       pb.className = 'print-btn ghost';
       pb.title = 'طباعة التذكرة';
       pb.innerHTML = icon('i-download');
-      pb.onclick = (ev)=>{ ev.stopPropagation(); window.IGETicket.open(ticketPayload(p)); };
+      pb.onclick = (ev)=>{
+        ev.stopPropagation();
+        if(window.IGE) window.IGE.logEvent('ticket','فتح/طباعة تذكرة الحجز '+loc,'ok');
+        window.IGETicket.open(ticketPayload(p));
+      };
       div.appendChild(pb);
       div.onclick = ()=>{ runCommand('RT '+loc); document.getElementById('cmdInput').focus(); };
       box.appendChild(div);
@@ -2313,13 +2578,7 @@ window.IGETicket = (function(){
   }
 
   /* ---------------- dispatcher ---------------- */
-  function runCommand(raw){
-    const line = raw.trim();
-    if(!line) return;
-    printEcho(line.toUpperCase());
-    if(window.IGE) window.IGE.bumpCommand();
-    const upper = line.toUpperCase();
-
+  function dispatch(line, upper){
     if(/^AN/.test(upper)) return cmd_AN(upper.slice(2));
     if(/^SS/.test(upper)) return cmd_SS(upper.slice(2));
     if(/^NM/.test(upper)) return cmd_NM(upper.slice(2));
@@ -2340,6 +2599,48 @@ window.IGETicket = (function(){
     if(/^HE(LP)?$/.test(upper)) return cmd_HE();
 
     print('UNABLE TO PROCESS — INVALID ENTRY. TYPE HE FOR HELP.','err');
+  }
+
+  function summarise(lines){
+    if(!lines.length) return {msg:'', level:'info'};
+    const err  = lines.find(l=>l.cls==='err');
+    const ok   = lines.find(l=>l.cls==='ok');
+    const warn = lines.find(l=>l.cls==='warn');
+    const pick = err || ok || warn || lines.find(l=>l.cls==='hdr') || lines[0];
+    const level = err ? 'err' : (ok ? 'ok' : (warn ? 'warn' : 'info'));
+    let msg = pick.text;
+    if(lines.length > 1) msg += '  (' + lines.length + ' سطر)';
+    return {msg, level};
+  }
+
+  function runCommand(raw){
+    const line = raw.trim();
+    if(!line) return;
+    printEcho(line.toUpperCase());
+    const upper = line.toUpperCase();
+
+    const outer = capture;                 // nested calls (saved-list clicks) stay safe
+    capture = [];
+    let result;
+    try{
+      result = dispatch(line, upper);
+    }catch(err){
+      print('SYSTEM ERROR — '+(err && err.message ? err.message : 'UNKNOWN'),'err');
+    }
+
+    const finish = ()=>{
+      const lines = capture;
+      capture = outer;
+      if(window.IGE){
+        const s = summarise(lines);
+        window.IGE.bumpCommand(upper, s.msg, s.level);
+      }
+    };
+    /* ET and friends resolve later — keep collecting until they do */
+    if(result && typeof result.then === 'function') result.then(finish, finish);
+    else finish();
+
+    return result;
   }
   window.__igeRunCommand = runCommand;
 
@@ -2365,12 +2666,19 @@ window.IGETicket = (function(){
   document.getElementById('btnSend').addEventListener('click', submit);
   input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
 
-  document.getElementById('btnHelp').addEventListener('click', ()=>{ cmd_HE(); scrollBottom(); });
-  document.getElementById('btnNewSession').addEventListener('click', ()=>{ cmd_IG(); scrollBottom(); input.focus(); });
+  document.getElementById('btnHelp').addEventListener('click', ()=>{
+    cmd_HE(); scrollBottom();
+    if(window.IGE) window.IGE.logEvent('nav','فتح قائمة الأوامر (Cheat sheet)','info');
+  });
+  document.getElementById('btnNewSession').addEventListener('click', ()=>{
+    cmd_IG(); scrollBottom(); input.focus();
+    if(window.IGE) window.IGE.logEvent('nav','بدء جلسة عمل جديدة (زر New session)','info');
+  });
   document.getElementById('btnWipe').addEventListener('click', async ()=>{
     if(!confirm('This clears all saved PNRs from storage for this simulator. Continue?')) return;
     directory = {};
-    try{ await window.storage.set('pnr-directory','{}',false); }catch(e){}
+    await window.IGEStore.set('pnr-directory','{}',false);
+    if(window.IGE) window.IGE.logEventNow('reset','مسح كل الحجوزات المحفوظة على هذا الجهاز','warn');
     draft = emptyDraft();
     availability = [];
     termBody.innerHTML='';
