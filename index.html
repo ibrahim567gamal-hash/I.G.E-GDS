@@ -425,193 +425,18 @@
   .gate-foot{
     text-align:center;font-size:10.5px;color:#b08d88;margin-top:14px;
   }
-  .gate-divider{
-    display:flex;align-items:center;gap:10px;
-    margin:16px 0 12px;color:#c9a9a4;font-size:10.5px;letter-spacing:1px;
+  .sync-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:600;color:#e6c6c1;
+    background:#2a0808;border:1px solid #5c1c1c;
+    padding:6px 11px;border-radius:20px;
   }
-  .gate-divider::before,.gate-divider::after{
-    content:"";flex:1;height:1px;background:var(--line);
-  }
-  .admin-toggle{
-    display:flex;align-items:center;justify-content:center;gap:7px;
-    width:100%;
-    background:transparent;border:1px solid var(--line);
-    color:var(--ink-soft);
-    font-family:var(--sans);font-size:12px;font-weight:600;
-    padding:9px;border-radius:8px;cursor:pointer;
-    transition:background .12s ease,border-color .12s ease;
-  }
-  .admin-toggle:hover{background:var(--panel-bg);border-color:#e6c6c1;}
-  #adminLoginBox{display:none;margin-top:12px;}
-  #adminLoginBox.show{display:block;}
+  .sync-pill .dot{width:7px;height:7px;border-radius:50%;background:#8a3a34;flex:none;}
+  .sync-pill.ok .dot{background:#54d19a;}
+  .sync-pill.warn .dot{background:var(--amber);}
+  .sync-pill.err .dot{background:#ff7b6b;}
   #appMain{display:none;}
 
-  /* ---------- Admin panel ---------- */
-  #adminScreen{
-    display:none;
-    position:fixed;inset:0;z-index:1000;
-    background:linear-gradient(165deg,#fdf1ef 0%,#f7d9d4 100%);
-    overflow:auto;
-  }
-  #adminScreen.show{display:block;}
-  .admin-bar{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    padding:12px 22px;
-    background:linear-gradient(180deg,#12261c,#0a1611);
-    border-bottom:3px solid #2f7d5b;
-    flex-wrap:wrap;
-  }
-  .admin-bar .title{
-    display:flex;align-items:center;gap:10px;
-    color:#c8f5dd;font-size:15px;font-weight:800;letter-spacing:.4px;
-  }
-  .admin-bar .title .ico{font-size:20px;color:#5fd6a0;}
-  .admin-bar .title small{
-    display:block;font-size:10.5px;font-weight:600;color:#7fae97;letter-spacing:1px;text-transform:uppercase;
-  }
-  .admin-wrap{max-width:1240px;margin:0 auto;padding:18px;}
-  .stat-grid{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-    gap:12px;margin-bottom:16px;
-  }
-  .stat{
-    background:var(--panel-card);border:1px solid var(--line);
-    border-radius:var(--radius);padding:14px 16px;
-    display:flex;align-items:center;gap:12px;
-  }
-  .stat .badge{
-    width:38px;height:38px;border-radius:9px;flex:none;
-    display:flex;align-items:center;justify-content:center;
-    background:var(--panel-bg);color:var(--brand);font-size:19px;
-  }
-  .stat .v{font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;font-family:var(--mono);}
-  .stat .k{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.9px;}
-  .admin-tools{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    margin-bottom:14px;
-  }
-  .search-box{
-    display:flex;align-items:center;gap:8px;
-    background:var(--panel-card);border:1px solid var(--line);
-    border-radius:8px;padding:8px 12px;flex:1;min-width:220px;
-    color:var(--ink-soft);
-  }
-  .search-box input{
-    flex:1;border:none;outline:none;background:transparent;
-    font-family:var(--sans);font-size:13px;color:var(--ink);min-width:0;
-  }
-  .abtn{
-    display:inline-flex;align-items:center;gap:7px;
-    font-family:var(--sans);font-size:12.5px;font-weight:600;
-    background:var(--panel-card);color:var(--brand-deep);
-    border:1px solid var(--line);
-    padding:9px 13px;border-radius:8px;cursor:pointer;
-    transition:background .12s ease;
-  }
-  .abtn:hover{background:var(--panel-bg);}
-  .abtn.danger{background:var(--brand);border-color:var(--brand);color:#fff;}
-  .abtn.danger:hover{background:var(--brand-deep);}
-  .table-card{
-    background:var(--panel-card);border:1px solid var(--line);
-    border-radius:var(--radius);overflow:hidden;
-  }
-  .table-scroll{overflow-x:auto;}
-  table.log{width:100%;border-collapse:collapse;min-width:760px;}
-  table.log th{
-    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;
-    color:var(--brand-deep);background:var(--panel-bg);
-    padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
-  }
-  table.log td{
-    padding:11px 14px;border-bottom:1px solid var(--line);
-    font-size:12.5px;color:var(--ink-soft);vertical-align:middle;
-  }
-  table.log tr:last-child td{border-bottom:none;}
-  table.log tr:hover td{background:#fffaf9;}
-  .who-cell{display:flex;align-items:center;gap:9px;}
-  .avatar{
-    width:30px;height:30px;border-radius:50%;flex:none;
-    background:linear-gradient(135deg,var(--brand),var(--brand-deep));
-    color:#fff;font-weight:800;font-size:12px;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .who-cell .nm{font-weight:700;color:var(--ink);font-size:13px;}
-  td.mono{font-family:var(--mono);font-size:12px;color:var(--ink);}
-  .tag-pnr{
-    display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;
-    background:#fff1e6;color:#8a5b0a;padding:2px 6px;border-radius:4px;margin:2px 3px 2px 0;
-  }
-  table.log tr.main-row{cursor:pointer;}
-  table.log tr.main-row.open td{background:#fff6f4;}
-  .chev{
-    display:inline-flex;color:var(--brand);
-    transition:transform .18s ease;
-  }
-  tr.main-row.open .chev{transform:rotate(180deg);}
-  .chev.disabled{color:#e0c4bf;}
-  tr.detail-row > td{background:#fffaf9;padding:0;border-bottom:1px solid var(--line);}
-  .detail-inner{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;}
-  .booking-card{
-    background:var(--panel-card);border:1px solid var(--line);
-    border-radius:9px;overflow:hidden;
-  }
-  .booking-head{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    padding:10px 13px;background:var(--panel-bg);border-bottom:1px solid var(--line);
-  }
-  .booking-head .loc{
-    display:inline-flex;align-items:center;gap:6px;
-    font-family:var(--mono);font-weight:800;font-size:13px;color:#fff;
-    background:linear-gradient(135deg,var(--brand),var(--brand-deep));
-    padding:4px 10px;border-radius:5px;
-  }
-  .booking-head .when{
-    display:inline-flex;align-items:center;gap:5px;
-    font-size:11px;color:var(--ink-soft);font-family:var(--mono);
-  }
-  .booking-head .total{
-    margin-left:auto;font-family:var(--mono);font-weight:800;font-size:13px;color:#1f6b4a;
-    background:#dcf5e8;padding:4px 10px;border-radius:5px;
-  }
-  .booking-grid{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:0;
-  }
-  .bk-block{padding:11px 13px;border-right:1px solid var(--line);}
-  .bk-block:last-child{border-right:none;}
-  .bk-block h5{
-    display:flex;align-items:center;gap:6px;
-    margin:0 0 7px;font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;
-    color:var(--brand-deep);font-weight:800;
-  }
-  .bk-block h5 .ico{font-size:13px;}
-  .bk-line{
-    font-size:12px;color:var(--ink);margin-bottom:4px;line-height:1.5;
-  }
-  .bk-line:last-child{margin-bottom:0;}
-  .bk-line .mono{font-family:var(--mono);font-size:11.5px;}
-  .bk-line .dim{color:var(--ink-soft);}
-  .seg-line{
-    display:flex;align-items:center;gap:7px;
-    font-family:var(--mono);font-size:11.5px;color:var(--ink);
-    padding:4px 0;border-bottom:1px dashed var(--line);
-  }
-  .seg-line:last-child{border-bottom:none;}
-  .seg-line .ico{color:var(--brand);font-size:13px;flex:none;}
-  .seg-line b{color:var(--brand-deep);}
-  .no-bookings{
-    display:flex;align-items:center;gap:8px;
-    font-size:12px;color:#b08d88;font-style:italic;
-    padding:6px 2px;
-  }
-  @media (max-width:640px){
-    .bk-block{border-right:none;border-bottom:1px solid var(--line);}
-    .bk-block:last-child{border-bottom:none;}
-  }
-  .tag-none{
-    display:inline-block;font-size:10.5px;font-weight:700;
-    background:#f4eae8;color:#a1817c;padding:3px 9px;border-radius:20px;
-  }
   /* ---------- Ticket preview + print ---------- */
   #ticketModal{
     display:none;
@@ -980,103 +805,7 @@
       </button>
     </form>
 
-    <div class="gate-divider">أو</div>
-    <button type="button" class="admin-toggle" id="btnAdminToggle">
-      <svg class="ico"><use href="#i-shield"/></svg>دخول المشرف (Admin)
-    </button>
-
-    <div id="adminLoginBox">
-      <div class="gate-field" style="margin-top:12px;">
-        <label for="adminPass"><svg class="ico"><use href="#i-lock"/></svg>كلمة مرور المشرف</label>
-        <input id="adminPass" type="password" autocomplete="off" placeholder="••••••••">
-        <div class="gate-error" id="adminPassErr">كلمة المرور غير صحيحة.</div>
-      </div>
-      <button type="button" class="gate-submit" id="btnAdminEnter">
-        <svg class="ico"><use href="#i-log"/></svg>فتح سجل الدخول
-      </button>
-    </div>
-
     <div class="gate-foot">بياناتك تُستخدم فقط لبدء جلسة التدريب وتسجيلها في سجل الدخول.</div>
-  </div>
-</div>
-
-<!-- ===== ADMIN SCREEN ===== -->
-<div id="adminScreen">
-  <div class="admin-bar">
-    <div class="title">
-      <svg class="ico"><use href="#i-shield"/></svg>
-      <div>لوحة المشرف<small id="adminStamp">بيانات الدخول وتفاصيل الحجوزات</small></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="tbtn admin" id="btnAdminRefresh"><svg class="ico"><use href="#i-refresh"/></svg>تحديث</button>
-      <button class="tbtn admin" id="btnAdminExport"><svg class="ico"><use href="#i-download"/></svg>تصدير الحجوزات</button>
-      <button class="tbtn admin" id="btnAdminExportLog"><svg class="ico"><use href="#i-log"/></svg>تصدير سجل النشاط</button>
-      <button class="tbtn primary" id="btnAdminClear"><svg class="ico"><use href="#i-trash"/></svg>مسح السجل</button>
-      <button class="tbtn" id="btnAdminExit"><svg class="ico"><use href="#i-exit"/></svg>خروج</button>
-    </div>
-  </div>
-
-  <div class="admin-wrap">
-    <div class="stat-grid">
-      <div class="stat">
-        <div class="badge"><svg class="ico"><use href="#i-log"/></svg></div>
-        <div><div class="v" id="statSessions">0</div><div class="k">إجمالي مرات الدخول</div></div>
-      </div>
-      <div class="stat">
-        <div class="badge"><svg class="ico"><use href="#i-users"/></svg></div>
-        <div><div class="v" id="statPeople">0</div><div class="k">أشخاص مختلفين</div></div>
-      </div>
-      <div class="stat">
-        <div class="badge"><svg class="ico"><use href="#i-ticket"/></svg></div>
-        <div><div class="v" id="statPnrs">0</div><div class="k">حجوزات تم إصدارها</div></div>
-      </div>
-      <div class="stat">
-        <div class="badge"><svg class="ico"><use href="#i-log"/></svg></div>
-        <div><div class="v" id="statEvents">0</div><div class="k">أحداث مسجّلة</div></div>
-      </div>
-      <div class="stat">
-        <div class="badge"><svg class="ico"><use href="#i-clock"/></svg></div>
-        <div><div class="v" id="statToday">0</div><div class="k">دخول النهارده</div></div>
-      </div>
-    </div>
-
-    <div class="storage-note" id="storageNote"></div>
-
-    <div class="admin-tools">
-      <div class="search-box">
-        <svg class="ico"><use href="#i-search"/></svg>
-        <input id="logSearch" type="search" placeholder="ابحث بالاسم أو رقم التليفون أو كود الحجز…">
-      </div>
-    </div>
-
-    <div class="table-card">
-      <div class="table-scroll">
-        <table class="log">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>رقم التليفون</th>
-              <th>وقت الدخول</th>
-              <th>آخر نشاط</th>
-              <th>الأوامر</th>
-              <th>الحجوزات المؤكدة</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="logBody"></tbody>
-        </table>
-      </div>
-      <div class="admin-empty" id="logEmpty">
-        <svg class="ico"><use href="#i-tower"/></svg>
-        <div>لسه محدش دخل السيستيم. أول ما متدرب يسجل دخول هيظهر هنا على طول.</div>
-      </div>
-    </div>
-
-    <div class="admin-note">
-      <svg class="ico"><use href="#i-info"/></svg>
-      <div>كل تسجيل دخول بيتحفظ في مفتاح مستقل في مساحة مشتركة، فأي حد يدخل من أي جهاز بيظهر هنا فورًا حتى لو ماعملش أي حجز، والجدول بيحدّث نفسه كل ١٥ ثانية. غيّر كلمة مرور المشرف من ثابت <code>ADMIN_PASSWORD</code> في أول سكربت الأدمن — دي حماية واجهة للتدريب، مش حماية سيرفر حقيقية.</div>
-    </div>
   </div>
 </div>
 
@@ -1089,6 +818,7 @@
     <div class="tag"><svg class="ico"><use href="#i-globe"/></svg>GDS Reservation Training Simulator</div>
   </div>
   <div class="topbar-actions">
+    <span class="sync-pill" id="syncPill"><span class="dot"></span>—</span>
     <button class="tbtn" id="btnHelp"><svg class="ico"><use href="#i-help"/></svg>Cheat sheet</button>
     <button class="tbtn" id="btnNewSession"><svg class="ico"><use href="#i-refresh"/></svg>New session (IG)</button>
     <button class="tbtn primary" id="btnWipe"><svg class="ico"><use href="#i-trash"/></svg>Reset all data</button>
@@ -1186,92 +916,188 @@
   <div class="ticket-scroll"><div id="ticketSheet"></div></div>
 </div>
 
-<!-- ===== STORAGE ADAPTER ===== -->
+<!-- ===== SHARED DATA CORE ===== -->
 <script>
-/* window.storage only exists inside the Claude preview. When this file is hosted
-   or opened directly, fall back to localStorage, then to memory, so the log still
-   records instead of failing silently. */
-window.IGEStore = (function(){
-  "use strict";
-  const mem = Object.create(null);
-  const LP = 'ige::';
+/* =======================================================================
+   I.G.E DATA CORE  —  identical file in index.html and admin.html
+   -----------------------------------------------------------------------
+   Everything that happens is appended as one immutable event row.
+   Nothing is ever overwritten, so no device can wipe another device's data.
 
-  const hasNative = (function(){
-    try{ return !!(window.storage && typeof window.storage.get === 'function'); }
-    catch(e){ return false; }
-  })();
+   ⇩⇩ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ⇩⇩
+   Leave it empty and the apps still work, but each browser only sees itself.
+   ======================================================================= */
+window.IGE_API_URL = 'https://script.google.com/macros/s/AKfycbzUXlrkhJnl1qKA_J2ZZYQJ9LBScJJEnHQbVI1d-rCUkLF7NZdog6quR84Isv4LS3ll/exec';
+window.IGE_ADMIN_PASSWORD = 'IGE-ADMIN-2026';
+
+window.IGEData = (function(){
+  "use strict";
+
+  const LOCAL_KEY   = 'ige-events-v1';
+  const PENDING_KEY = 'ige-pending-v1';
+  const MAX_LOCAL   = 4000;
+
+  let memEvents = [];        // last-resort store when the browser blocks everything
+  let lastError = '';
+  let lastSync  = 0;
+
+  const url = String(window.IGE_API_URL || '').trim();
+  const hasRemote = /^https?:\/\//i.test(url);
+
   const hasLocal = (function(){
     try{
-      const k = '__ige_probe';
+      const k='__ige_probe';
       window.localStorage.setItem(k,'1');
       window.localStorage.removeItem(k);
       return true;
     }catch(e){ return false; }
   })();
 
-  const backend = hasNative ? 'native' : (hasLocal ? 'local' : 'memory');
-  const lk = (key, shared) => LP + (shared ? 's::' : 'p::') + key;
+  const backend = hasRemote ? 'remote' : (hasLocal ? 'local' : 'memory');
 
-  async function get(key, shared){
+  /* ---------- local helpers ---------- */
+  function readLocal(key){
+    if(!hasLocal) return [];
     try{
-      if(backend === 'native'){
-        const r = await window.storage.get(key, !!shared);
-        return (r && r.value != null) ? r.value : null;
-      }
-      if(backend === 'local') return window.localStorage.getItem(lk(key, shared));
-      const v = mem[lk(key, shared)];
-      return v == null ? null : v;
-    }catch(e){ return null; }
-  }
-
-  async function set(key, value, shared){
-    try{
-      if(backend === 'native'){ await window.storage.set(key, value, !!shared); return true; }
-      if(backend === 'local'){ window.localStorage.setItem(lk(key, shared), value); return true; }
-      mem[lk(key, shared)] = value;
-      return true;
-    }catch(e){ return false; }
-  }
-
-  async function del(key, shared){
-    try{
-      if(backend === 'native'){ await window.storage.delete(key, !!shared); return true; }
-      if(backend === 'local'){ window.localStorage.removeItem(lk(key, shared)); return true; }
-      delete mem[lk(key, shared)];
-      return true;
-    }catch(e){ return false; }
-  }
-
-  async function list(prefix, shared){
-    const pre = prefix || '';
-    try{
-      if(backend === 'native'){
-        const r = await window.storage.list(pre, !!shared);
-        const raw = (r && r.keys) ? r.keys : [];
-        return raw
-          .map(k => typeof k === 'string' ? k : (k && (k.key || k.name)) || '')
-          .filter(k => k && k.indexOf(pre) === 0);
-      }
-      const head = LP + (shared ? 's::' : 'p::');
-      let full;
-      if(backend === 'local'){
-        full = [];
-        const ls = window.localStorage;
-        for(let i=0; i<ls.length; i++){
-          const k = ls.key(i);
-          if(k) full.push(k);
-        }
-      } else {
-        full = Object.keys(mem);
-      }
-      return full
-        .filter(k => k.indexOf(head) === 0)
-        .map(k => k.slice(head.length))
-        .filter(k => k.indexOf(pre) === 0);
+      const raw = window.localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
     }catch(e){ return []; }
   }
+  function writeLocal(key, arr){
+    if(!hasLocal) return false;
+    try{
+      const trimmed = arr.length > MAX_LOCAL ? arr.slice(-MAX_LOCAL) : arr;
+      window.localStorage.setItem(key, JSON.stringify(trimmed));
+      return true;
+    }catch(e){ lastError = 'local: '+(e && e.message || e); return false; }
+  }
+  function pushStore(ev){
+    if(hasLocal){
+      const all = readLocal(LOCAL_KEY);
+      all.push(ev);
+      writeLocal(LOCAL_KEY, all);
+    } else {
+      memEvents.push(ev);
+      if(memEvents.length > MAX_LOCAL) memEvents = memEvents.slice(-MAX_LOCAL);
+    }
+  }
+  function localAll(){
+    return hasLocal ? readLocal(LOCAL_KEY) : memEvents.slice();
+  }
 
-  return { get, set, delete:del, list, backend };
+  /* ---------- remote helpers (Google Apps Script) ---------- */
+  /* Sent as text/plain on purpose: it keeps the request "simple" so the
+     browser skips the CORS preflight that Apps Script cannot answer. */
+  async function post(payload){
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+  async function getRows(){
+    const res = await fetch(url + (url.indexOf('?')>=0?'&':'?') + 'action=list&t=' + Date.now(), {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    return Array.isArray(data.rows) ? data.rows : [];
+  }
+
+  function queue(ev){
+    const p = hasLocal ? readLocal(PENDING_KEY) : [];
+    p.push(ev);
+    if(hasLocal) writeLocal(PENDING_KEY, p);
+    else memEvents.push(ev);
+  }
+  function pendingCount(){
+    return hasLocal ? readLocal(PENDING_KEY).length : 0;
+  }
+
+  /* send anything that failed earlier */
+  async function flush(){
+    if(!hasRemote || !hasLocal) return;
+    const p = readLocal(PENDING_KEY);
+    if(!p.length) return;
+    try{
+      await post({action:'append', rows:p});
+      writeLocal(PENDING_KEY, []);
+      lastError = '';
+      lastSync = Date.now();
+    }catch(e){ lastError = 'sync: '+(e && e.message || e); }
+  }
+
+  /* ---------- public API ---------- */
+  function newId(){
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+  }
+
+  /* every single thing that happens goes through here */
+  async function append(ev){
+    const row = Object.assign({id:newId(), t:Date.now()}, ev);
+    pushStore(row);                        // always keep a local copy
+    if(hasRemote){
+      try{
+        await post({action:'append', rows:[row]});
+        lastError = '';
+        lastSync = Date.now();
+      }catch(e){
+        lastError = 'send: '+(e && e.message || e);
+        queue(row);                        // retried automatically
+      }
+    }
+    return row;
+  }
+
+  /* fire-and-forget: never blocks the UI */
+  function log(ev){ append(ev).catch(()=>{}); }
+
+  /* everything ever recorded, newest last, de-duplicated */
+  async function all(){
+    const seen = Object.create(null);
+    const out = [];
+    const add = list => list.forEach(r=>{
+      if(!r || !r.id || seen[r.id]) return;
+      seen[r.id] = 1;
+      out.push(r);
+    });
+
+    if(hasRemote){
+      try{
+        add(await getRows());
+        lastError = '';
+        lastSync = Date.now();
+      }catch(e){ lastError = 'load: '+(e && e.message || e); }
+    }
+    add(localAll());                       // local copy fills any gap
+    out.sort((a,b)=> (a.t||0) - (b.t||0));
+    return out;
+  }
+
+  async function clear(){
+    if(hasLocal){ writeLocal(LOCAL_KEY, []); writeLocal(PENDING_KEY, []); }
+    memEvents = [];
+    if(hasRemote){
+      try{ await post({action:'clear'}); }
+      catch(e){ lastError = 'clear: '+(e && e.message || e); }
+    }
+  }
+
+  function status(){
+    return {backend, url, pending: pendingCount(), lastError, lastSync};
+  }
+
+  if(hasRemote){
+    setInterval(flush, 20000);
+    window.addEventListener('online', flush);
+    flush();
+  }
+
+  return {append, log, all, clear, status, newId, backend};
 })();
 </script>
 
@@ -1581,516 +1407,123 @@ window.IGETicket = (function(){
 })();
 </script>
 
-<!-- ===== ACCESS LOG + ADMIN ===== -->
+<!-- ===== LOCAL PNR STORE ===== -->
+<script>
+/* The saved-PNR list is per-device working state, kept separate from the
+   permanent event log that the admin app reads. */
+window.IGEStore = (function(){
+  "use strict";
+  const KEY = 'ige-pnr-directory';
+  let mem = null;
+  const ok = (function(){
+    try{ const k='__ige_probe2'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }
+    catch(e){ return false; }
+  })();
+  return {
+    async get(){
+      if(!ok) return mem;
+      try{ return localStorage.getItem(KEY); }catch(e){ return mem; }
+    },
+    async set(_k, value){
+      mem = value;
+      if(!ok) return true;
+      try{ localStorage.setItem(KEY, value); }catch(e){}
+      return true;
+    }
+  };
+})();
+</script>
+
+<!-- ===== SESSION RECORDER ===== -->
 <script>
 (function(){
   "use strict";
+  const D = window.IGEData;
 
-  /* ⇩⇩ غيّري كلمة مرور المشرف من هنا ⇩⇩ */
-  const ADMIN_PASSWORD = 'IGE-ADMIN-2026';
+  let sid = null, who = {name:'', phone:''};
 
-  const SESSION_PREFIX = 'ige-session:';   // one key per login — no overwriting
-  const LEGACY_KEY = 'ige-access-log';     // older single-blob format
-  const MAX_ENTRIES = 400;
-
-  let log = [];              // every session the admin can see
-  let entry = null;          // this device's own session object
-  let entryKey = null;       // its storage key
-  let isAdmin = false;
-  let filter = '';
-
-  /* ---------- helpers ---------- */
-  function newId(){ return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
-  function fmtTime(ts){
-    if(!ts) return '—';
-    const d = new Date(ts);
-    const p = n => n<10 ? '0'+n : ''+n;
-    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' · '+p(d.getHours())+':'+p(d.getMinutes());
-  }
-  function initials(name){
-    const parts = String(name||'?').trim().split(/\s+/).slice(0,2);
-    return parts.map(p=>p.charAt(0)).join('').toUpperCase() || '?';
-  }
-  function esc(s){
-    return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function sameDay(ts){
-    const a = new Date(ts), b = new Date();
-    return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
-  }
-  function normalise(e){
-    if(!e || !e.id) return null;
-    if(!Array.isArray(e.bookings)){
-      e.bookings = (e.pnrs||[]).map(loc=>({locator:loc, names:[], segments:[], contacts:[], tk:null, rf:null}));
-    }
-    delete e.pnrs; delete e.role;
-    return e;
-  }
-
-  /* ---------- storage: one shared key per session ---------- */
-  const S = window.IGEStore;
-
-  async function sessionKeys(){
-    let keys = await S.list(SESSION_PREFIX, true);
-    keys.sort();
-    if(keys.length > MAX_ENTRIES) keys = keys.slice(-MAX_ENTRIES);
-    return keys;
-  }
-
-  async function loadLog(){
-    const found = [];
-
-    // every individual session written by any device
-    const keys = await sessionKeys();
-    for(let i=0; i<keys.length; i+=8){
-      const batch = keys.slice(i, i+8);
-      const got = await Promise.all(batch.map(async k=>{
-        const raw = await S.get(k, true);
-        if(!raw) return null;
-        try{ return JSON.parse(raw); }catch(e){ return null; }
-      }));
-      got.forEach(v=>{ const n = normalise(v); if(n) found.push(n); });
-    }
-
-    // anything saved by the older single-blob version
-    const legacy = await S.get(LEGACY_KEY, true);
-    if(legacy){
-      try{
-        const arr = JSON.parse(legacy);
-        if(Array.isArray(arr)){
-          arr.filter(e=>e && e.role !== 'admin').forEach(v=>{
-            const n = normalise(v);
-            if(n && !found.some(f=>f.id === n.id)) found.push(n);
-          });
-        }
-      }catch(e){ /* unreadable legacy blob */ }
-    }
-
-    // keep this device's live session visible even before its first write lands
-    if(entry && !found.some(f=>f.id === entry.id)) found.push(entry);
-
-    found.sort((a,b)=> (a.loginAt||0) - (b.loginAt||0));
-    log = found;
-    return log;
-  }
-
-  async function saveEntry(){
-    if(!entry || !entryKey) return;
-    await S.set(entryKey, JSON.stringify(entry), true);
-  }
-
-  /* ---------- public API used by the gate + simulator ---------- */
-  const MAX_EVENTS = 300;
-
-  function pushEvent(kind, text, level, cmd){
-    if(!entry) return;
-    if(!Array.isArray(entry.events)) entry.events = [];
-    entry.events.push({
-      t: Date.now(),
+  function emit(kind, msg, level, cmd, data){
+    if(!sid) return;
+    D.log({
+      sid: sid,
+      name: who.name,
+      phone: who.phone,
       k: kind,                       // login | cmd | pnr | ticket | cancel | reset | nav
       c: cmd || '',
-      m: String(text||'').slice(0,240),
-      s: level || 'info'             // ok | err | warn | info
+      m: String(msg||'').slice(0,300),
+      s: level || 'info',
+      data: data || null
     });
-    if(entry.events.length > MAX_EVENTS) entry.events = entry.events.slice(-MAX_EVENTS);
-    entry.lastAt = Date.now();
-  }
-
-  /* anything the simulator wants on the record */
-  function logEvent(kind, text, level, cmd){
-    if(!entry) return;
-    pushEvent(kind, text, level, cmd);
-    queueSave();
-  }
-  function logEventNow(kind, text, level, cmd){
-    if(!entry) return;
-    pushEvent(kind, text, level, cmd);
-    saveEntry();
   }
 
   async function startSession(name, phone){
-    const id = newId();
-    entry = {
-      id: id,
-      name: name,
-      phone: phone || '',
-      loginAt: Date.now(),
-      lastAt: Date.now(),
-      commands: 0,
-      bookings: [],      // full PNR snapshots confirmed by this person
-      events: [],        // everything this person did, in order
-      agent: (navigator.userAgent||'').slice(0,120)
-    };
-    entryKey = SESSION_PREFIX + id;
-    pushEvent('login', 'تسجيل دخول — ' + name + ' · ' + (phone||'—'), 'ok');
-    await saveEntry();   // the login itself is recorded straight away
-    return id;
+    sid = D.newId();
+    who = {name:name, phone:phone||''};
+    await D.append({
+      sid: sid, name: name, phone: who.phone,
+      k: 'login', c: '', s: 'ok',
+      m: 'تسجيل دخول — ' + name + ' · ' + (who.phone||'—'),
+      data: {ua: (navigator.userAgent||'').slice(0,140), screen: (window.screen?window.screen.width+'x'+window.screen.height:'')}
+    });
+    paint();
+    return sid;
   }
-  function current(){ return entry; }
 
-  let saveTimer = null;
-  function queueSave(){
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveEntry, 700);
-  }
-  /* every entry typed into the terminal, with the reply it produced */
-  function bumpCommand(cmd, reply, level){
-    if(!entry) return;
-    entry.commands++;
-    pushEvent('cmd', reply || '', level || 'info', cmd || '');
-    queueSave();
-  }
-  /* snapshot = {locator,names,segments,contacts,tk,rf,total} */
+  /* every terminal entry, with the reply it produced */
+  function bumpCommand(cmd, reply, level){ emit('cmd', reply, level, cmd); }
+
   function recordPnr(snapshot){
-    if(!entry || !snapshot || !snapshot.locator) return;
-    if(!Array.isArray(entry.bookings)) entry.bookings = [];
-    const stamped = Object.assign({}, snapshot, {confirmedAt: Date.now()});
-    const at = entry.bookings.findIndex(b=>b.locator===snapshot.locator);
-    if(at >= 0) entry.bookings[at] = stamped;      // re-ended PNR — keep the latest state
-    else entry.bookings.push(stamped);
+    if(!snapshot || !snapshot.locator) return;
     const pax = (snapshot.names||[]).length, seg = (snapshot.segments||[]).length;
-    pushEvent('pnr', 'تأكيد حجز ' + snapshot.locator + ' · ' + pax + ' راكب · ' + seg + ' رحلة', 'ok');
-    saveEntry();
+    emit('pnr', 'تأكيد حجز ' + snapshot.locator + ' · ' + pax + ' راكب · ' + seg + ' رحلة', 'ok', '',
+         Object.assign({confirmedAt: Date.now()}, snapshot));
   }
   function removePnr(locator){
-    if(!entry || !Array.isArray(entry.bookings)) return;
-    entry.bookings = entry.bookings.filter(b=>b.locator!==locator);
-    pushEvent('cancel', 'إلغاء الحجز ' + locator, 'warn');
-    saveEntry();
+    emit('cancel', 'إلغاء الحجز ' + locator, 'warn', '', {locator: locator});
   }
+  function logEvent(kind, text, level, cmd){ emit(kind, text, level, cmd); }
+  const logEventNow = logEvent;
 
-  /* ---------- admin rendering ---------- */
-  const adminScreen = document.getElementById('adminScreen');
-  const logBody = document.getElementById('logBody');
-  const logEmpty = document.getElementById('logEmpty');
+  window.IGE = {startSession, bumpCommand, recordPnr, removePnr, logEvent, logEventNow, sid: ()=>sid};
 
-  function bookingsOf(e){ return Array.isArray(e.bookings) ? e.bookings : []; }
-
-  function visibleRows(){
-    const q = filter.trim().toLowerCase();
-    const rows = log.slice().reverse();
-    if(!q) return rows;
-    return rows.filter(e =>
-      String(e.name).toLowerCase().includes(q) ||
-      String(e.phone).toLowerCase().includes(q) ||
-      bookingsOf(e).some(b =>
-        String(b.locator).toLowerCase().includes(q) ||
-        (b.names||[]).some(n=> (n.surname+' '+n.given).toLowerCase().includes(q)) ||
-        (b.segments||[]).some(s=> (s.carrier+s.flightNo+' '+s.origin+s.dest).toLowerCase().includes(q))
-      ) ||
-      (e.events||[]).some(v => (String(v.c)+' '+String(v.m)).toLowerCase().includes(q))
-    );
-  }
-
-  function renderStats(){
-    const people = new Set(log.map(e=> (e.name||'').trim().toLowerCase()+'|'+(e.phone||'').trim()));
-    const pnrCount = log.reduce((n,e)=> n + bookingsOf(e).length, 0);
-    const evCount = log.reduce((n,e)=> n + (Array.isArray(e.events)? e.events.length : 0), 0);
-    const today = log.filter(e=> sameDay(e.loginAt)).length;
-    document.getElementById('statSessions').textContent = log.length;
-    document.getElementById('statPeople').textContent = people.size;
-    document.getElementById('statPnrs').textContent = pnrCount;
-    document.getElementById('statEvents').textContent = evCount;
-    document.getElementById('statToday').textContent = today;
-
-    const note = document.getElementById('storageNote');
-    if(note){
-      const b = S.backend;
-      const desc = b === 'native'
-        ? 'التخزين المشترك شغّال — كل الأجهزة اللي بتفتح نفس الرابط بتظهر هنا.'
-        : (b === 'local'
-            ? 'التخزين محلي على هذا المتصفح — هيسجّل ويفضل محفوظ بعد قفل الصفحة، لكن المتدربين اللي على أجهزة تانية مش هيظهروا هنا إلا لو فتحوا نفس المتصفح.'
-            : 'المتصفح مانع التخزين — التسجيل شغّال في الذاكرة بس وهيضيع مع قفل الصفحة. جرّبي متصفح تاني أو اطلعي من وضع التصفح الخفي.');
-      note.innerHTML = `<span class="dot${b==='native'?'':' warn'}"></span>` +
-        `<span>وضع التخزين: <code>${esc(b)}</code></span><span>${esc(desc)}</span>`;
-    }
-  }
-
-  function ico(id){ return '<svg class="ico"><use href="#'+id+'"/></svg>'; }
-
-  function bookingCard(b){
-    const names = (b.names||[]).length
-      ? (b.names||[]).map(n=>`<div class="bk-line">${esc(n.surname)}/${esc(n.given)}${n.title?' <span class="dim">'+esc(n.title)+'</span>':''}</div>`).join('')
-      : '<div class="bk-line dim">—</div>';
-
-    const segs = (b.segments||[]).length
-      ? (b.segments||[]).map(s=>
-          `<div class="seg-line">${ico('i-plane')}<b>${esc(s.carrier)}${esc(s.flightNo)}</b> ` +
-          `${esc(s.origin)}→${esc(s.dest)} · ${esc(s.date)} · ${esc(s.dep)}-${esc(s.arr)} · ` +
-          `<span class="dim">CLS ${esc(s.bookedClass)} · HK${esc(s.paxCount)} · ${esc(s.aircraft)}</span></div>`
-        ).join('')
-      : '<div class="bk-line dim">—</div>';
-
-    const contacts = (b.contacts||[]).length
-      ? (b.contacts||[]).map(c=>`<div class="bk-line"><span class="dim">${esc(c.type)}:</span> <span class="mono">${esc(c.value)}</span></div>`).join('')
-      : '<div class="bk-line dim">—</div>';
-
-    const tk = b.tk ? 'TK'+esc(b.tk.code)+esc(b.tk.detail||'') : '—';
-    const total = (b.total || b.total === 0) ? 'USD '+Number(b.total).toFixed(2) : 'لم يتم التسعير';
-
-    return `<div class="booking-card">
-      <div class="booking-head">
-        <span class="loc">${ico('i-ticket')}${esc(b.locator)}</span>
-        <span class="when">${ico('i-clock')}تأكيد: ${fmtTime(b.confirmedAt)}</span>
-        <span class="total">${total}</span>
-        <button class="print-btn" data-print="${esc(b.locator)}">${ico('i-download')}التذكرة</button>
-      </div>
-      <div class="booking-grid">
-        <div class="bk-block">
-          <h5>${ico('i-passport')}الركاب (${(b.names||[]).length})</h5>${names}
-        </div>
-        <div class="bk-block">
-          <h5>${ico('i-takeoff')}الرحلات (${(b.segments||[]).length})</h5>${segs}
-        </div>
-        <div class="bk-block">
-          <h5>${ico('i-phone')}بيانات التواصل</h5>${contacts}
-        </div>
-        <div class="bk-block">
-          <h5>${ico('i-list')}التذكرة</h5>
-          <div class="bk-line"><span class="dim">Ticketing:</span> <span class="mono">${tk}</span></div>
-          <div class="bk-line"><span class="dim">Received from:</span> <span class="mono">${esc(b.rf||'—')}</span></div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  const EVENT_META = {
-    login:  {i:'i-user',     t:'دخول',   c:'ev-login'},
-    cmd:    {i:'i-list',     t:'أمر',     c:'ev-cmd'},
-    pnr:    {i:'i-ticket',   t:'حجز',    c:'ev-pnr'},
-    ticket: {i:'i-download', t:'تذكرة',  c:'ev-tkt'},
-    cancel: {i:'i-trash',    t:'إلغاء',  c:'ev-cancel'},
-    reset:  {i:'i-refresh',  t:'مسح',    c:'ev-cancel'},
-    nav:    {i:'i-compass',  t:'تصفح',   c:'ev-nav'}
-  };
-
-  function activityBlock(e){
-    const evs = Array.isArray(e.events) ? e.events : [];
-    if(!evs.length){
-      return `<div class="activity-card"><div class="act-head">${ico('i-log')}سجل النشاط</div>
-        <div class="no-bookings">${ico('i-info')}مفيش نشاط مسجّل للجلسة دي.</div></div>`;
-    }
-    const rows = evs.slice().reverse().map(v=>{
-      const meta = EVENT_META[v.k] || EVENT_META.nav;
-      return `<tr class="${esc(v.s||'info')}">
-        <td class="mono">${fmtTime(v.t)}</td>
-        <td><span class="ev-tag ${meta.c}">${ico(meta.i)}${meta.t}</span></td>
-        <td class="mono">${v.c ? esc(v.c) : '<span class="dim">—</span>'}</td>
-        <td>${esc(v.m||'')}</td>
-      </tr>`;
-    }).join('');
-    return `<div class="activity-card">
-      <div class="act-head">${ico('i-log')}سجل النشاط <span class="cnt">${evs.length} حدث</span></div>
-      <div class="act-scroll">
-        <table class="act">
-          <thead><tr><th>الوقت</th><th>النوع</th><th>الأمر</th><th>النتيجة</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }
-
-  function renderTable(){
-    const rows = visibleRows();
-    logBody.innerHTML = '';
-    if(rows.length === 0){
-      logEmpty.style.display = 'flex';
-      logEmpty.querySelector('div').textContent = log.length === 0
-        ? 'لسه محدش دخل السيستيم. أول ما حد يسجل دخول هيظهر هنا باسمه ورقم تليفونه.'
-        : 'مفيش نتائج مطابقة للبحث. جرّبي اسم أو رقم تاني.';
-      return;
-    }
-    logEmpty.style.display = 'none';
-
-    rows.forEach((e, i)=>{
-      const num = rows.length - i;
-      const bks = bookingsOf(e);
-
-      const tr = document.createElement('tr');
-      tr.className = 'main-row';
-      tr.innerHTML =
-        `<td class="mono">${num}</td>` +
-        `<td><div class="who-cell"><div class="avatar">${esc(initials(e.name))}</div>` +
-          `<div class="nm">${esc(e.name)}</div></div></td>` +
-        `<td class="mono" dir="ltr">${esc(e.phone||'—')}</td>` +
-        `<td class="mono">${fmtTime(e.loginAt)}</td>` +
-        `<td class="mono">${fmtTime(e.lastAt)}</td>` +
-        `<td class="mono">${e.commands}</td>` +
-        `<td>${bks.length ? bks.map(b=>`<span class="tag-pnr">${esc(b.locator)}</span>`).join('') : '<span class="tag-none">دخول فقط</span>'}</td>` +
-        `<td><span class="chev${bks.length?'':' disabled'}">${ico('i-chevron')}</span></td>`;
-
-      const detail = document.createElement('tr');
-      detail.className = 'detail-row';
-      detail.style.display = 'none';
-      detail.innerHTML = `<td colspan="8"><div class="detail-inner">${
-        bks.length
-          ? bks.slice().reverse().map(bookingCard).join('')
-          : `<div class="no-bookings">${ico('i-suitcase')}الشخص ده سجّل دخول بس لسه مأكدش أي حجز.</div>`
-      }${activityBlock(e)}</div></td>`;
-
-      tr.addEventListener('click', ()=>{
-        const open = detail.style.display !== 'none';
-        detail.style.display = open ? 'none' : 'table-row';
-        tr.classList.toggle('open', !open);
-      });
-
-      detail.querySelectorAll('button[data-print]').forEach(btn=>{
-        btn.addEventListener('click', ev=>{
-          ev.stopPropagation();
-          const loc = btn.getAttribute('data-print');
-          const bk = bks.find(x=>x.locator === loc);
-          if(bk && window.IGETicket) window.IGETicket.open(bk);
-        });
-      });
-
-      logBody.appendChild(tr);
-      logBody.appendChild(detail);
-    });
-  }
-
-  let refreshTimer = null;
-
-  async function renderAdmin(){
-    await loadLog();
-    renderStats();
-    renderTable();
-    const stamp = document.getElementById('adminStamp');
-    if(stamp) stamp.textContent = 'آخر تحديث ' + fmtTime(Date.now()).split(' · ')[1];
-  }
-
-  function openAdmin(){
-    isAdmin = true;
-    document.getElementById('gateScreen').style.display = 'none';
-    document.getElementById('appMain').style.display = 'none';
-    adminScreen.classList.add('show');
-    renderAdmin();
-    clearInterval(refreshTimer);
-    refreshTimer = setInterval(()=>{ if(adminScreen.classList.contains('show')) renderAdmin(); }, 15000);
-  }
-  function closeAdmin(){
-    clearInterval(refreshTimer);
-    adminScreen.classList.remove('show');
-    if(window.__igeTrainee){
-      document.getElementById('appMain').style.display = 'block';
+  /* ---- small sync indicator so nobody has to guess whether it saved ---- */
+  function paint(){
+    const el = document.getElementById('syncPill');
+    if(!el) return;
+    const st = D.status();
+    let cls, label;
+    if(st.backend === 'remote'){
+      if(st.lastError){ cls='warn'; label='في انتظار الاتصال · ' + st.pending + ' مؤجل'; }
+      else { cls='ok'; label='متصل بالسيرفر'; }
+    } else if(st.backend === 'local'){
+      cls='warn'; label='تخزين محلي على الجهاز';
     } else {
-      document.getElementById('gateScreen').style.display = 'flex';
+      cls='err'; label='التخزين متوقف';
     }
+    el.className = 'sync-pill ' + cls;
+    el.innerHTML = '<span class="dot"></span>' + label;
+    el.title = st.url || 'لم يتم ضبط رابط السيرفر';
   }
+  setInterval(paint, 5000);
+  document.addEventListener('DOMContentLoaded', paint);
+  paint();
 
-  function exportCsv(){
-    const cell = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
-    const head = ['#','Name','Phone','Login','Last activity','Commands',
-                  'PNR','Confirmed at','Passengers','Flights','Contacts','Ticketing','Received from','Total USD'];
-    const lines = [head.join(',')];
-    log.slice().reverse().forEach((e,i)=>{
-      const num = log.length - i;
-      const base = [num, cell(e.name), cell(e.phone), cell(fmtTime(e.loginAt)), cell(fmtTime(e.lastAt)), e.commands];
-      const bks = bookingsOf(e);
-      if(bks.length === 0){
-        lines.push(base.concat(['','','','','','','','']).join(','));
-        return;
+  /* record the tab closing so the admin can see how long a session ran */
+  window.addEventListener('beforeunload', function(){
+    if(!sid) return;
+    try{
+      const st = D.status();
+      if(st.backend === 'remote' && navigator.sendBeacon){
+        navigator.sendBeacon(window.IGE_API_URL, JSON.stringify({
+          action:'append',
+          rows:[{id:D.newId(), t:Date.now(), sid:sid, name:who.name, phone:who.phone,
+                 k:'nav', c:'', s:'info', m:'إغلاق الصفحة / انتهاء الجلسة'}]
+        }));
+      } else {
+        emit('nav','إغلاق الصفحة / انتهاء الجلسة','info');
       }
-      bks.forEach(b=>{
-        const pax = (b.names||[]).map(n=>n.surname+'/'+n.given+(n.title?' '+n.title:'')).join(' | ');
-        const flights = (b.segments||[]).map(s=>
-          s.carrier+s.flightNo+' '+s.origin+'-'+s.dest+' '+s.date+' '+s.dep+'/'+s.arr+' '+s.bookedClass+' HK'+s.paxCount
-        ).join(' | ');
-        const cts = (b.contacts||[]).map(c=>c.type+': '+c.value).join(' | ');
-        const tk = b.tk ? 'TK'+b.tk.code+(b.tk.detail||'') : '';
-        lines.push(base.concat([
-          cell(b.locator), cell(fmtTime(b.confirmedAt)), cell(pax), cell(flights), cell(cts),
-          cell(tk), cell(b.rf||''), (b.total||b.total===0) ? Number(b.total).toFixed(2) : ''
-        ]).join(','));
-      });
-    });
-    const blob = new Blob(['\ufeff'+lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ige-access-log.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url), 500);
-  }
-
-  function download(name, text){
-    const blob = new Blob(['\ufeff'+text], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url), 500);
-  }
-
-  function exportActivityCsv(){
-    const cell = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
-    const lines = [['Time','Name','Phone','Type','Command','Result','Status'].join(',')];
-    log.slice().reverse().forEach(e=>{
-      (e.events||[]).slice().reverse().forEach(v=>{
-        const meta = EVENT_META[v.k] || EVENT_META.nav;
-        lines.push([
-          cell(fmtTime(v.t)), cell(e.name), cell(e.phone),
-          cell(meta.t), cell(v.c||''), cell(v.m||''), cell(v.s||'')
-        ].join(','));
-      });
-    });
-    download('ige-activity-log.csv', lines.join('\n'));
-  }
-
-  /* ---------- admin wiring ---------- */
-  document.getElementById('btnAdminRefresh').addEventListener('click', renderAdmin);
-  document.getElementById('btnAdminExport').addEventListener('click', exportCsv);
-  document.getElementById('btnAdminExportLog').addEventListener('click', exportActivityCsv);
-  document.getElementById('btnAdminExit').addEventListener('click', closeAdmin);
-  document.getElementById('btnAdminClear').addEventListener('click', async ()=>{
-    if(!confirm('هيتم مسح سجل الدخول بالكامل ومش هينفع يترجع. تكملي؟')) return;
-    const keys = await sessionKeys();
-    for(const k of keys){
-      await S.delete(k, true);
-    }
-    await S.delete(LEGACY_KEY, true);
-    entry = null; entryKey = null;
-    log = [];
-    renderStats();
-    renderTable();
+    }catch(e){}
   });
-  document.getElementById('logSearch').addEventListener('input', e=>{
-    filter = e.target.value;
-    renderTable();
-  });
-
-  const adminBox = document.getElementById('adminLoginBox');
-  const adminPass = document.getElementById('adminPass');
-  const adminPassErr = document.getElementById('adminPassErr');
-
-  document.getElementById('btnAdminToggle').addEventListener('click', ()=>{
-    adminBox.classList.toggle('show');
-    if(adminBox.classList.contains('show')) adminPass.focus();
-  });
-  async function tryAdmin(){
-    if(adminPass.value !== ADMIN_PASSWORD){
-      adminPass.classList.add('invalid');
-      adminPassErr.classList.add('show');
-      adminPass.select();
-      return;
-    }
-    adminPass.classList.remove('invalid');
-    adminPassErr.classList.remove('show');
-    adminPass.value = '';
-    openAdmin();   // the admin is a viewer, not a logged trainee
-  }
-  document.getElementById('btnAdminEnter').addEventListener('click', tryAdmin);
-  adminPass.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); tryAdmin(); } });
-  adminPass.addEventListener('input', ()=>{
-    adminPass.classList.remove('invalid');
-    adminPassErr.classList.remove('show');
-  });
-
-  /* expose to the other scripts */
-  window.IGE = { startSession, bumpCommand, recordPnr, removePnr, logEvent, logEventNow, openAdmin, loadLog, isAdmin: ()=>isAdmin };
-
-  loadLog();
 })();
 </script>
 
@@ -2143,12 +1576,12 @@ window.IGETicket = (function(){
 
   /* ---------------- storage ---------------- */
   async function loadDirectory(){
-    const raw = await window.IGEStore.get('pnr-directory', false);
+    const raw = await window.IGEStore.get();
     if(raw){ try{ directory = JSON.parse(raw); }catch(e){ directory = {}; } }
     renderSaved();
   }
   async function saveDirectory(){
-    await window.IGEStore.set('pnr-directory', JSON.stringify(directory), false);
+    await window.IGEStore.set(0, JSON.stringify(directory));
   }
 
   /* ---------------- terminal rendering ---------------- */
@@ -2677,7 +2110,7 @@ window.IGETicket = (function(){
   document.getElementById('btnWipe').addEventListener('click', async ()=>{
     if(!confirm('This clears all saved PNRs from storage for this simulator. Continue?')) return;
     directory = {};
-    await window.IGEStore.set('pnr-directory','{}',false);
+    await window.IGEStore.set(0,'{}');
     if(window.IGE) window.IGE.logEventNow('reset','مسح كل الحجوزات المحفوظة على هذا الجهاز','warn');
     draft = emptyDraft();
     availability = [];
