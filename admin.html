@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I.G.E — لوحة المشرف</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%2312261c%27/%3E%3Cpath d=%27M32 8l18 7v14c0 11-7.6 20.2-18 23.4C21.6 49.2 14 40 14 29V15z%27 fill=%27none%27 stroke=%27%235fd6a0%27 stroke-width=%274%27/%3E%3C/svg%3E">
+<style>
+:root{
+    --navy:#3a0a0a;
+    --terminal-bg:#2a0707;
+    --terminal-line:#3d0d0d;
+    --phosphor:#ff8a7a;
+    --phosphor-dim:#8a3a34;
+    --phosphor-bright:#ffe9e5;
+    --ok:#8dffa9;
+    --warn:#ffcf6b;
+    --err:#ff7b6b;
+    --panel-bg:#fdf1ef;
+    --panel-card:#ffffff;
+    --ink:#7a1414;
+    --ink-soft:#a15b52;
+    --line:#f2dcd8;
+    --brand:#c62828;
+    --brand-deep:#7f1414;
+    --amber:#e0a94a;
+    --radius:10px;
+    --mono: 'JetBrains Mono','Consolas','SFMono-Regular','Courier New',monospace;
+    --sans: -apple-system,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:linear-gradient(160deg,#fdf1ef 0%,#fbe3df 45%,#f7d2cd 100%);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Icon system ---------- */
+  .ico{
+    width:1em;height:1em;
+    flex:none;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    vertical-align:-0.13em;
+  }
+  .ico.solid{fill:currentColor;stroke:none;}
+  .ico-lg{width:1.35em;height:1.35em;}
+
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:linear-gradient(165deg,#fdf1ef 0%,#f7d9d4 100%);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  .ico{
+    width:1em;height:1em;flex:none;
+    stroke:currentColor;fill:none;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round;
+    vertical-align:-0.13em;
+  }
+  .ico.solid{fill:currentColor;stroke:none;}
+  .ico-lg{width:1.35em;height:1.35em;}
+  .tbtn{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--sans);font-size:12.5px;font-weight:600;
+    color:#f5dcd8;background:#3a1010;border:1px solid #5c1c1c;
+    padding:7px 12px;border-radius:7px;cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .tbtn:hover{background:#4d1616;}
+  .tbtn:active{transform:translateY(1px);}
+  .tbtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  .tbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .tbtn.primary:hover{background:var(--brand-deep);}
+  .tbtn.admin{background:#1f3a2b;border-color:#2f5c43;color:#c8f5dd;}
+  .tbtn.admin:hover{background:#2a4f39;}
+
+  /* ---------- Login gate ---------- */
+  #lockScreen{
+    position:fixed;inset:0;z-index:900;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 20%,#1d4232 0%,#12261c 55%,#080f0c 100%);
+    padding:20px;
+  }
+  #lockScreen.hidden{display:none;}
+  .lock-card{
+    width:100%;max-width:370px;
+    background:var(--panel-card);
+    border-radius:14px;padding:28px 26px 22px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.55);
+    border:1px solid var(--line);
+    text-align:center;
+  }
+  .lock-card .shield{
+    width:54px;height:54px;margin:0 auto 12px;border-radius:14px;
+    background:linear-gradient(135deg,#1f6b4a,#12402d);
+    color:#8ff0c2;display:flex;align-items:center;justify-content:center;
+  }
+  .lock-card .shield .ico{font-size:27px;}
+  .lock-card h1{margin:0 0 4px;font-size:17px;font-weight:800;color:var(--brand-deep);letter-spacing:.3px;}
+  .lock-card p{margin:0 0 20px;font-size:12px;color:var(--ink-soft);}
+  .lock-card input{
+    width:100%;padding:11px 12px;border-radius:8px;
+    border:1px solid var(--line);font-size:14px;font-family:var(--sans);
+    color:var(--ink);outline:none;text-align:center;letter-spacing:2px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .lock-card input:focus{border-color:#2f7d5b;box-shadow:0 0 0 3px rgba(47,125,91,.14);}
+  .lock-card input.invalid{border-color:var(--err);}
+  .lock-err{display:none;font-size:11.5px;color:var(--err);margin-top:8px;}
+  .lock-err.show{display:block;}
+  .lock-btn{
+    width:100%;margin-top:12px;padding:11px;border:none;border-radius:8px;
+    background:linear-gradient(135deg,#1f6b4a,#12402d);
+    color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .lock-btn:hover{opacity:.93;}
+  .lock-foot{font-size:10.5px;color:#b08d88;margin-top:14px;}
+
+  /* ---------- Admin panel ---------- */
+  #adminScreen{
+    display:none;
+    position:fixed;inset:0;z-index:1000;
+    background:linear-gradient(165deg,#fdf1ef 0%,#f7d9d4 100%);
+    overflow:auto;
+  }
+  #adminScreen.show{display:block;}
+  .admin-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 22px;
+    background:linear-gradient(180deg,#12261c,#0a1611);
+    border-bottom:3px solid #2f7d5b;
+    flex-wrap:wrap;
+  }
+  .admin-bar .title{
+    display:flex;align-items:center;gap:10px;
+    color:#c8f5dd;font-size:15px;font-weight:800;letter-spacing:.4px;
+  }
+  .admin-bar .title .ico{font-size:20px;color:#5fd6a0;}
+  .admin-bar .title small{
+    display:block;font-size:10.5px;font-weight:600;color:#7fae97;letter-spacing:1px;text-transform:uppercase;
+  }
+  .admin-wrap{max-width:1240px;margin:0 auto;padding:18px;}
+  .stat-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:12px;margin-bottom:16px;
+  }
+  .stat{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:14px 16px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .stat .badge{
+    width:38px;height:38px;border-radius:9px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-bg);color:var(--brand);font-size:19px;
+  }
+  .stat .v{font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;font-family:var(--mono);}
+  .stat .k{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.9px;}
+  .admin-tools{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .search-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;flex:1;min-width:220px;
+    color:var(--ink-soft);
+  }
+  .search-box input{
+    flex:1;border:none;outline:none;background:transparent;
+    font-family:var(--sans);font-size:13px;color:var(--ink);min-width:0;
+  }
+  .abtn{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--sans);font-size:12.5px;font-weight:600;
+    background:var(--panel-card);color:var(--brand-deep);
+    border:1px solid var(--line);
+    padding:9px 13px;border-radius:8px;cursor:pointer;
+    transition:background .12s ease;
+  }
+  .abtn:hover{background:var(--panel-bg);}
+  .abtn.danger{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .abtn.danger:hover{background:var(--brand-deep);}
+  .table-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .table-scroll{overflow-x:auto;}
+  table.log{width:100%;border-collapse:collapse;min-width:760px;}
+  table.log th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:1px;
+    color:var(--brand-deep);background:var(--panel-bg);
+    padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.log td{
+    padding:11px 14px;border-bottom:1px solid var(--line);
+    font-size:12.5px;color:var(--ink-soft);vertical-align:middle;
+  }
+  table.log tr:last-child td{border-bottom:none;}
+  table.log tr:hover td{background:#fffaf9;}
+  .who-cell{display:flex;align-items:center;gap:9px;}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+    color:#fff;font-weight:800;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .who-cell .nm{font-weight:700;color:var(--ink);font-size:13px;}
+  td.mono{font-family:var(--mono);font-size:12px;color:var(--ink);}
+  .tag-pnr{
+    display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;
+    background:#fff1e6;color:#8a5b0a;padding:2px 6px;border-radius:4px;margin:2px 3px 2px 0;
+  }
+  table.log tr.main-row{cursor:pointer;}
+  table.log tr.main-row.open td{background:#fff6f4;}
+  .chev{
+    display:inline-flex;color:var(--brand);
+    transition:transform .18s ease;
+  }
+  tr.main-row.open .chev{transform:rotate(180deg);}
+  .chev.disabled{color:#e0c4bf;}
+  tr.detail-row > td{background:#fffaf9;padding:0;border-bottom:1px solid var(--line);}
+  .detail-inner{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;}
+  .booking-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:9px;overflow:hidden;
+  }
+  .booking-head{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:10px 13px;background:var(--panel-bg);border-bottom:1px solid var(--line);
+  }
+  .booking-head .loc{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-weight:800;font-size:13px;color:#fff;
+    background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+    padding:4px 10px;border-radius:5px;
+  }
+  .booking-head .when{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;color:var(--ink-soft);font-family:var(--mono);
+  }
+  .booking-head .total{
+    margin-left:auto;font-family:var(--mono);font-weight:800;font-size:13px;color:#1f6b4a;
+    background:#dcf5e8;padding:4px 10px;border-radius:5px;
+  }
+  .booking-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:0;
+  }
+  .bk-block{padding:11px 13px;border-right:1px solid var(--line);}
+  .bk-block:last-child{border-right:none;}
+  .bk-block h5{
+    display:flex;align-items:center;gap:6px;
+    margin:0 0 7px;font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;
+    color:var(--brand-deep);font-weight:800;
+  }
+  .bk-block h5 .ico{font-size:13px;}
+  .bk-line{
+    font-size:12px;color:var(--ink);margin-bottom:4px;line-height:1.5;
+  }
+  .bk-line:last-child{margin-bottom:0;}
+  .bk-line .mono{font-family:var(--mono);font-size:11.5px;}
+  .bk-line .dim{color:var(--ink-soft);}
+  .seg-line{
+    display:flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:11.5px;color:var(--ink);
+    padding:4px 0;border-bottom:1px dashed var(--line);
+  }
+  .seg-line:last-child{border-bottom:none;}
+  .seg-line .ico{color:var(--brand);font-size:13px;flex:none;}
+  .seg-line b{color:var(--brand-deep);}
+  .no-bookings{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;color:#b08d88;font-style:italic;
+    padding:6px 2px;
+  }
+  @media (max-width:640px){
+    .bk-block{border-right:none;border-bottom:1px solid var(--line);}
+    .bk-block:last-child{border-bottom:none;}
+  }
+  .tag-none{
+    display:inline-block;font-size:10.5px;font-weight:700;
+    background:#f4eae8;color:#a1817c;padding:3px 9px;border-radius:20px;
+  }
+
+
+
+  .activity-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:9px;overflow:hidden;
+  }
+  .act-head{
+    display:flex;align-items:center;gap:8px;
+    padding:9px 13px;background:var(--panel-bg);border-bottom:1px solid var(--line);
+    font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--brand-deep);
+  }
+  .act-head .ico{font-size:14px;}
+  .act-head .cnt{
+    margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;
+    background:#fff1e6;color:#8a5b0a;padding:2px 8px;border-radius:20px;letter-spacing:0;
+  }
+  .act-scroll{max-height:320px;overflow:auto;}
+  table.act{width:100%;border-collapse:collapse;min-width:600px;}
+  table.act th{
+    position:sticky;top:0;
+    text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.9px;
+    color:var(--ink-soft);background:#fffaf9;
+    padding:7px 11px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.act td{
+    padding:7px 11px;border-bottom:1px solid #f7ecea;
+    font-size:11.5px;color:var(--ink-soft);vertical-align:top;
+  }
+  table.act td.mono{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;}
+  table.act td .dim{color:#c9a9a4;}
+  table.act tr:last-child td{border-bottom:none;}
+  table.act tr.err td{background:#fff5f4;}
+  table.act tr.ok  td{background:#f7fdf9;}
+  table.act tr.warn td{background:#fffbf2;}
+  .ev-tag{
+    display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+    font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  }
+  .ev-tag .ico{font-size:12px;}
+  .ev-login{background:#e8eefb;color:#2c4a86;}
+  .ev-cmd{background:#f2eef7;color:#5b4380;}
+  .ev-pnr{background:#dcf5e8;color:#1f6b4a;}
+  .ev-tkt{background:#fff1e6;color:#8a5b0a;}
+  .ev-cancel{background:#fbe4e0;color:var(--brand-deep);}
+  .ev-nav{background:#eef0f2;color:#5a6570;}
+
+  .storage-note{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--ink-soft);
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;
+  }
+  .storage-note .dot{
+    width:8px;height:8px;border-radius:50%;background:#2f7d5b;flex:none;
+  }
+  .storage-note .dot.warn{background:var(--amber);}
+  .storage-note code{
+    font-family:var(--mono);font-size:10.5px;background:var(--panel-bg);
+    padding:1px 6px;border-radius:4px;color:var(--brand-deep);
+  }
+
+  .admin-empty{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:48px 20px;color:#b08d88;font-size:13px;text-align:center;
+  }
+  .admin-empty .ico{font-size:34px;color:#e6c6c1;}
+  .admin-note{
+    display:flex;gap:9px;align-items:flex-start;
+    font-size:11.5px;color:var(--ink-soft);
+    background:#fff6f4;border:1px dashed #ecd0cb;border-radius:8px;
+    padding:11px 13px;margin-top:14px;line-height:1.6;
+  }
+  .admin-note .ico{font-size:15px;color:var(--brand);margin-top:1px;}
+  /* ---------- Ticket preview + print ---------- */
+  #ticketModal{
+    display:none;
+    position:fixed;inset:0;z-index:1200;
+    background:rgba(30,6,6,.62);
+    flex-direction:column;
+  }
+  #ticketModal.show{display:flex;}
+  .ticket-toolbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:11px 18px;flex-wrap:wrap;
+    background:linear-gradient(180deg,var(--navy),#150202);
+    border-bottom:3px solid var(--brand);
+  }
+  .ticket-toolbar .tt-title{
+    display:flex;align-items:center;gap:9px;
+    color:#f5dcd8;font-size:14px;font-weight:700;letter-spacing:.3px;
+  }
+  .ticket-toolbar .tt-title .ico{font-size:19px;color:var(--phosphor);}
+  .ticket-toolbar .tt-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .ticket-scroll{flex:1;overflow:auto;padding:22px 14px 40px;}
+
+  #ticketSheet{margin:0 auto;width:210mm;max-width:100%;}
+  .tkt-page{
+    background:#fff;
+    width:210mm;max-width:100%;
+    min-height:297mm;
+    margin:0 auto 22px;
+    padding:14mm 14mm 12mm;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,.5);
+    color:#111;
+    font-family:var(--sans);
+    font-size:10.5px;
+    line-height:1.45;
+    position:relative;
+    overflow:hidden;
+  }
+  .tkt-page::before{
+    content:"TRAINING DOCUMENT";
+    position:absolute;top:47%;left:50%;
+    transform:translate(-50%,-50%) rotate(-32deg);
+    font-family:var(--sans);
+    font-size:64px;font-weight:800;letter-spacing:6px;
+    color:rgba(198,40,40,.07);
+    white-space:nowrap;pointer-events:none;
+  }
+  .tkt-band{
+    background:#7f1414;color:#fff;
+    text-align:center;font-size:9px;font-weight:700;
+    letter-spacing:1.6px;text-transform:uppercase;
+    padding:5px 8px;margin:0 0 12px;border-radius:3px;
+  }
+  .tkt-head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    border-bottom:2px solid #111;padding-bottom:9px;margin-bottom:11px;
+  }
+  .tkt-issuer{display:flex;align-items:center;gap:10px;}
+  .tkt-issuer .mark{
+    width:38px;height:38px;border-radius:7px;flex:none;
+    background:linear-gradient(135deg,#5a1010,#2a0606);
+    color:#ff8a7a;display:flex;align-items:center;justify-content:center;
+  }
+  .tkt-issuer .mark .ico{font-size:21px;}
+  .tkt-issuer h1{
+    margin:0;font-size:16px;font-weight:800;letter-spacing:2px;color:#111;
+  }
+  .tkt-issuer .sub{font-size:8.5px;color:#555;letter-spacing:.9px;text-transform:uppercase;}
+  .tkt-doc{text-align:right;}
+  .tkt-doc .kind{
+    font-size:12.5px;font-weight:800;letter-spacing:1.1px;color:#7f1414;text-transform:uppercase;
+  }
+  .tkt-doc .kind small{display:block;font-size:8.5px;color:#555;letter-spacing:1px;font-weight:600;}
+
+  .tkt-strip{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border:1px solid #111;margin-bottom:11px;
+  }
+  .tkt-strip > div{padding:6px 9px;border-right:1px solid #ccc;}
+  .tkt-strip > div:last-child{border-right:none;}
+  .tkt-strip .lbl{
+    font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:#666;font-weight:700;
+  }
+  .tkt-strip .val{font-family:var(--mono);font-size:12px;font-weight:700;color:#111;letter-spacing:.4px;}
+
+  .tkt-sec{margin-bottom:11px;}
+  .tkt-sec > h2{
+    margin:0 0 5px;font-size:8.5px;font-weight:800;letter-spacing:1.5px;
+    text-transform:uppercase;color:#7f1414;
+    border-bottom:1px solid #ddd;padding-bottom:3px;
+  }
+  table.tkt{width:100%;border-collapse:collapse;}
+  table.tkt th{
+    text-align:left;font-size:7.5px;letter-spacing:.8px;text-transform:uppercase;
+    color:#555;font-weight:700;padding:4px 6px;background:#f2f2f2;
+    border:1px solid #ddd;white-space:nowrap;
+  }
+  table.tkt td{
+    padding:5px 6px;border:1px solid #ddd;
+    font-family:var(--mono);font-size:9.5px;color:#111;vertical-align:top;
+  }
+  table.tkt td.wrap{font-family:var(--sans);}
+  .tkt-two{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+  .kv{display:flex;gap:6px;padding:2.5px 0;border-bottom:1px dotted #ddd;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{
+    flex:none;width:38%;font-size:8px;letter-spacing:.6px;text-transform:uppercase;color:#666;font-weight:700;
+    padding-top:1px;
+  }
+  .kv .v{font-family:var(--mono);font-size:9.5px;color:#111;word-break:break-word;}
+  .fare-calc{
+    font-family:var(--mono);font-size:9px;color:#111;
+    background:#f7f7f7;border:1px solid #ddd;padding:6px 8px;word-break:break-word;
+  }
+  .tkt-total{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#111;color:#fff;padding:7px 11px;margin-top:6px;
+  }
+  .tkt-total .l{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;}
+  .tkt-total .r{font-family:var(--mono);font-size:14px;font-weight:800;letter-spacing:.5px;}
+  .tkt-notes{
+    font-size:8px;color:#555;line-height:1.6;
+    border-top:1px solid #ddd;padding-top:7px;margin-top:11px;
+  }
+  .tkt-notes b{color:#7f1414;}
+  .tkt-foot{
+    display:flex;justify-content:space-between;gap:10px;
+    font-size:7.5px;color:#777;letter-spacing:.5px;
+    border-top:1px solid #111;margin-top:9px;padding-top:5px;
+    font-family:var(--mono);
+  }
+  .bar{
+    height:34px;margin-top:9px;
+    background:repeating-linear-gradient(90deg,#111 0 2px,#fff 2px 4px,#111 4px 5px,#fff 5px 9px,#111 9px 12px,#fff 12px 13px);
+  }
+  .bar-num{
+    text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:3px;color:#111;margin-top:3px;
+  }
+  @media (max-width:820px){
+    .tkt-page{padding:9mm 7mm;}
+    .tkt-strip{grid-template-columns:repeat(2,1fr);}
+    .tkt-strip > div{border-bottom:1px solid #ccc;}
+    .tkt-two{grid-template-columns:1fr;}
+  }
+
+  @page{size:A4;margin:0;}
+  @media print{
+    html,body{background:#fff !important;height:auto;}
+    body > *{display:none !important;}
+    body > #ticketModal{
+      display:block !important;
+      position:static;inset:auto;background:none;
+    }
+    .ticket-toolbar{display:none !important;}
+    .ticket-scroll{overflow:visible;padding:0;}
+    #ticketSheet{width:auto;}
+    .tkt-page{
+      width:auto;min-height:auto;margin:0;padding:12mm 12mm 10mm;
+      box-shadow:none;page-break-after:always;
+    }
+    .tkt-page:last-child{page-break-after:auto;}
+    .tkt-page::before{color:rgba(198,40,40,.09);}
+    .tkt-band{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .tkt-total,.tkt-band,table.tkt th,.tkt-issuer .mark{
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+  }
+
+  .print-btn{
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:var(--sans);font-size:11px;font-weight:700;
+    background:var(--brand);color:#fff;border:none;
+    padding:5px 10px;border-radius:6px;cursor:pointer;
+    transition:background .12s ease;
+  }
+  .print-btn:hover{background:var(--brand-deep);}
+  .print-btn.ghost{
+    background:transparent;color:var(--brand-deep);border:1px solid var(--line);
+  }
+  .print-btn.ghost:hover{background:var(--panel-bg);}
+
+  .activity-card{
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:9px;overflow:hidden;
+  }
+  .act-head{
+    display:flex;align-items:center;gap:8px;
+    padding:9px 13px;background:var(--panel-bg);border-bottom:1px solid var(--line);
+    font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--brand-deep);
+  }
+  .act-head .ico{font-size:14px;}
+  .act-head .cnt{
+    margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;
+    background:#fff1e6;color:#8a5b0a;padding:2px 8px;border-radius:20px;letter-spacing:0;
+  }
+  .act-scroll{max-height:320px;overflow:auto;}
+  table.act{width:100%;border-collapse:collapse;min-width:600px;}
+  table.act th{
+    position:sticky;top:0;
+    text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.9px;
+    color:var(--ink-soft);background:#fffaf9;
+    padding:7px 11px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.act td{
+    padding:7px 11px;border-bottom:1px solid #f7ecea;
+    font-size:11.5px;color:var(--ink-soft);vertical-align:top;
+  }
+  table.act td.mono{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;}
+  table.act td .dim{color:#c9a9a4;}
+  table.act tr:last-child td{border-bottom:none;}
+  table.act tr.err td{background:#fff5f4;}
+  table.act tr.ok  td{background:#f7fdf9;}
+  table.act tr.warn td{background:#fffbf2;}
+  .ev-tag{
+    display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+    font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  }
+  .ev-tag .ico{font-size:12px;}
+  .ev-login{background:#e8eefb;color:#2c4a86;}
+  .ev-cmd{background:#f2eef7;color:#5b4380;}
+  .ev-pnr{background:#dcf5e8;color:#1f6b4a;}
+  .ev-tkt{background:#fff1e6;color:#8a5b0a;}
+  .ev-cancel{background:#fbe4e0;color:var(--brand-deep);}
+  .ev-nav{background:#eef0f2;color:#5a6570;}
+
+  .storage-note{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--ink-soft);
+    background:var(--panel-card);border:1px solid var(--line);
+    border-radius:8px;padding:8px 12px;
+  }
+  .storage-note .dot{
+    width:8px;height:8px;border-radius:50%;background:#2f7d5b;flex:none;
+  }
+  .storage-note .dot.warn{background:var(--amber);}
+  .storage-note code{
+    font-family:var(--mono);font-size:10.5px;background:var(--panel-bg);
+    padding:1px 6px;border-radius:4px;color:var(--brand-deep);
+  }
+
+  .admin-empty{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:48px 20px;color:#b08d88;font-size:13px;text-align:center;
+  }
+  .admin-empty .ico{font-size:34px;color:#e6c6c1;}
+  .admin-note{
+    display:flex;gap:9px;align-items:flex-start;
+    font-size:11.5px;color:var(--ink-soft);
+    background:#fff6f4;border:1px dashed #ecd0cb;border-radius:8px;
+    padding:11px 13px;margin-top:14px;line-height:1.6;
+  }
+  .admin-note .ico{font-size:15px;color:var(--brand);margin-top:1px;}
+
+  /* admin app runs full-page, not as an overlay */
+  #adminScreen{position:static;display:block;background:none;}
+  .admin-wrap{padding-bottom:40px;}
+  table.log th, table.act th{text-align:right;}
+  table.log td.mono[dir="ltr"]{text-align:left;}
+  .live-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:600;color:#c8f5dd;
+    background:#12261c;border:1px solid #2f5c43;
+    padding:6px 11px;border-radius:20px;
+  }
+  .live-pill .dot{width:7px;height:7px;border-radius:50%;background:#7fae97;flex:none;}
+  .live-pill.ok .dot{background:#54d19a;}
+  .live-pill.warn .dot{background:var(--amber);}
+  .live-pill.err .dot{background:#ff7b6b;}
+</style>
+</head>
+<body>
+
+<!-- ===== ICON SPRITE (tourism / air travel) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-plane" viewBox="0 0 24 24">
+    <path d="M21 15.5l-8.5-4V5.2a1.7 1.7 0 0 0-3.4 0v6.3L1 15.5v2l8.1-2.3v4l-2.4 1.6V22l3.9-1 3.9 1v-1.2l-2.4-1.6v-4l8.1 2.3z"/>
+  </symbol>
+  <symbol id="i-takeoff" viewBox="0 0 24 24">
+    <path d="M2.5 19h19"/><path d="M4 14.6l1.9.5 3.6-3-4.8-5.4 1.7-.5 6.4 4.4 4.1-1.1a2 2 0 1 1 1 3.8L5.6 17z"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>
+  </symbol>
+  <symbol id="i-suitcase" viewBox="0 0 24 24">
+    <rect x="2.5" y="7.5" width="19" height="13" rx="2.5"/><path d="M8.5 7.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v2.5"/><path d="M8.5 20.5v-13M15.5 20.5v-13"/>
+  </symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24">
+    <path d="M3 8.5V6.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 6.5v2a2.2 2.2 0 0 0 0 4.4v4.6a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-4.6a2.2 2.2 0 0 0 0-4.4z"/><path d="M14 5v3M14 11v2M14 16v3"/>
+  </symbol>
+  <symbol id="i-passport" viewBox="0 0 24 24">
+    <rect x="4" y="2.5" width="16" height="19" rx="2.4"/><circle cx="12" cy="10" r="3.2"/><path d="M8.8 17.2h6.4"/>
+  </symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24">
+    <path d="M12 21.5s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10.3" r="2.7"/>
+  </symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/>
+  </symbol>
+  <symbol id="i-users" viewBox="0 0 24 24">
+    <circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16.2 5a3.4 3.4 0 0 1 0 6.6"/><path d="M17.4 14.2A6.2 6.2 0 0 1 21.2 20"/>
+  </symbol>
+  <symbol id="i-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="3.8"/><path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24">
+    <path d="M6.6 3.5h3l1.5 3.8-2 1.4a11 11 0 0 0 5.2 5.2l1.4-2 3.8 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24">
+    <path d="M12 2.6l7.5 3v6.1c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7V5.6z"/><path d="M9 12.2l2.1 2.1 4-4.1"/>
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24">
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8.2 10.5V7.6a3.8 3.8 0 0 1 7.6 0v2.9"/>
+  </symbol>
+  <symbol id="i-log" viewBox="0 0 24 24">
+    <rect x="4" y="3" width="16" height="18" rx="2.2"/><path d="M8 8h8M8 12h8M8 16h5"/>
+  </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>
+  </symbol>
+  <symbol id="i-download" viewBox="0 0 24 24">
+    <path d="M12 3.5v11"/><path d="M7.8 10.5L12 14.7l4.2-4.2"/><path d="M4.5 19.5h15"/>
+  </symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24">
+    <path d="M20 11.5a8 8 0 1 0-1.3 5.5"/><path d="M20 5.5v6h-6"/>
+  </symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24">
+    <path d="M4 6.5h16"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/><path d="M6.5 6.5l.9 13a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13"/>
+  </symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24">
+    <path d="M14.5 3.5h3a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>
+  </symbol>
+  <symbol id="i-help" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.7v.3"/><path d="M12 17.2h.01"/>
+  </symbol>
+  <symbol id="i-list" viewBox="0 0 24 24">
+    <path d="M8.5 6.5h12M8.5 12h12M8.5 17.5h12"/><path d="M4 6.5h.01M4 12h.01M4 17.5h.01"/>
+  </symbol>
+  <symbol id="i-info" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.8h.01"/>
+  </symbol>
+  <symbol id="i-tower" viewBox="0 0 24 24">
+    <path d="M10 21h4"/><path d="M12 21V10"/><path d="M8.5 10h7l-1-4.5h-5z"/><path d="M6 4.2A9 9 0 0 0 6 13"/><path d="M18 4.2a9 9 0 0 1 0 8.8"/>
+  </symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24">
+    <path d="M6 9.5l6 6 6-6"/>
+  </symbol>
+  <symbol id="i-seat" viewBox="0 0 24 24">
+    <path d="M6.5 3.5h3l1.2 9h5.8"/><path d="M6.5 3.5l1.4 12.5a2 2 0 0 0 2 1.8h8.6"/><path d="M18.5 20.5h-11"/>
+  </symbol>
+</svg>
+
+
+
+<!-- ===== LOGIN ===== -->
+<div id="lockScreen">
+  <div class="lock-card">
+    <div class="shield"><svg class="ico"><use href="#i-shield"/></svg></div>
+    <h1>لوحة مشرف I.G.E</h1>
+    <p>سجل كل ما يحدث على نظام الحجز</p>
+    <input id="pass" type="password" autocomplete="off" placeholder="كلمة المرور">
+    <div class="lock-err" id="passErr">كلمة المرور غير صحيحة.</div>
+    <button class="lock-btn" id="btnEnter"><svg class="ico"><use href="#i-log"/></svg>دخول</button>
+    <div class="lock-foot">تطبيق مستقل — لا يمكن الوصول إليه من شاشة الحجز.</div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="adminScreen">
+  <div class="admin-bar">
+    <div class="title">
+      <svg class="ico"><use href="#i-shield"/></svg>
+      <div>لوحة المشرف<small id="adminStamp">سجل الدخول والنشاط والحجوزات</small></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span class="live-pill" id="livePill"><span class="dot"></span>—</span>
+      <button class="tbtn admin" id="btnRefresh"><svg class="ico"><use href="#i-refresh"/></svg>تحديث</button>
+      <button class="tbtn admin" id="btnExport"><svg class="ico"><use href="#i-download"/></svg>تصدير الحجوزات</button>
+      <button class="tbtn admin" id="btnExportLog"><svg class="ico"><use href="#i-log"/></svg>تصدير سجل النشاط</button>
+      <button class="tbtn primary" id="btnClear"><svg class="ico"><use href="#i-trash"/></svg>مسح السجل</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-log"/></svg></div>
+        <div><div class="v" id="statSessions">0</div><div class="k">إجمالي مرات الدخول</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-users"/></svg></div>
+        <div><div class="v" id="statPeople">0</div><div class="k">أشخاص مختلفين</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-ticket"/></svg></div>
+        <div><div class="v" id="statPnrs">0</div><div class="k">حجوزات مؤكدة</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-list"/></svg></div>
+        <div><div class="v" id="statEvents">0</div><div class="k">أحداث مسجّلة</div></div>
+      </div>
+      <div class="stat">
+        <div class="badge"><svg class="ico"><use href="#i-clock"/></svg></div>
+        <div><div class="v" id="statToday">0</div><div class="k">دخول النهارده</div></div>
+      </div>
+    </div>
+
+    <div class="storage-note" id="storageNote"></div>
+
+    <div class="admin-tools">
+      <div class="search-box">
+        <svg class="ico"><use href="#i-search"/></svg>
+        <input id="logSearch" type="search" placeholder="ابحث بالاسم أو التليفون أو كود الحجز أو أي أمر…">
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="log">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>رقم التليفون</th>
+              <th>وقت الدخول</th>
+              <th>آخر نشاط</th>
+              <th>الأوامر</th>
+              <th>الحجوزات المؤكدة</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <div class="admin-empty" id="logEmpty">
+        <svg class="ico"><use href="#i-tower"/></svg>
+        <div>لسه محدش دخل السيستيم.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TICKET PREVIEW / PRINT ===== -->
+<div id="ticketModal">
+  <div class="ticket-toolbar">
+    <div class="tt-title">
+      <svg class="ico"><use href="#i-ticket"/></svg>
+      <span id="ticketTitle">Electronic Ticket</span>
+    </div>
+    <div class="tt-actions">
+      <button class="tbtn primary" id="btnTicketPrint"><svg class="ico"><use href="#i-download"/></svg>طباعة / حفظ PDF</button>
+      <button class="tbtn" id="btnTicketClose"><svg class="ico"><use href="#i-exit"/></svg>إغلاق</button>
+    </div>
+  </div>
+  <div class="ticket-scroll"><div id="ticketSheet"></div></div>
+</div>
+
+
+<!-- ===== SHARED DATA CORE ===== -->
+<script>
+/* =======================================================================
+   I.G.E DATA CORE  —  identical file in index.html and admin.html
+   -----------------------------------------------------------------------
+   Everything that happens is appended as one immutable event row.
+   Nothing is ever overwritten, so no device can wipe another device's data.
+
+   ⇩⇩ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ⇩⇩
+   Leave it empty and the apps still work, but each browser only sees itself.
+   ======================================================================= */
+window.IGE_API_URL = 'https://script.google.com/macros/s/AKfycbzUXlrkhJnl1qKA_J2ZZYQJ9LBScJJEnHQbVI1d-rCUkLF7NZdog6quR84Isv4LS3ll/exec';
+window.IGE_ADMIN_PASSWORD = 'IGE-ADMIN-2026';
+
+window.IGEData = (function(){
+  "use strict";
+
+  const LOCAL_KEY   = 'ige-events-v1';
+  const PENDING_KEY = 'ige-pending-v1';
+  const MAX_LOCAL   = 4000;
+
+  let memEvents = [];        // last-resort store when the browser blocks everything
+  let lastError = '';
+  let lastSync  = 0;
+
+  const url = String(window.IGE_API_URL || '').trim();
+  const hasRemote = /^https?:\/\//i.test(url);
+
+  const hasLocal = (function(){
+    try{
+      const k='__ige_probe';
+      window.localStorage.setItem(k,'1');
+      window.localStorage.removeItem(k);
+      return true;
+    }catch(e){ return false; }
+  })();
+
+  const backend = hasRemote ? 'remote' : (hasLocal ? 'local' : 'memory');
+
+  /* ---------- local helpers ---------- */
+  function readLocal(key){
+    if(!hasLocal) return [];
+    try{
+      const raw = window.localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function writeLocal(key, arr){
+    if(!hasLocal) return false;
+    try{
+      const trimmed = arr.length > MAX_LOCAL ? arr.slice(-MAX_LOCAL) : arr;
+      window.localStorage.setItem(key, JSON.stringify(trimmed));
+      return true;
+    }catch(e){ lastError = 'local: '+(e && e.message || e); return false; }
+  }
+  function pushStore(ev){
+    if(hasLocal){
+      const all = readLocal(LOCAL_KEY);
+      all.push(ev);
+      writeLocal(LOCAL_KEY, all);
+    } else {
+      memEvents.push(ev);
+      if(memEvents.length > MAX_LOCAL) memEvents = memEvents.slice(-MAX_LOCAL);
+    }
+  }
+  function localAll(){
+    return hasLocal ? readLocal(LOCAL_KEY) : memEvents.slice();
+  }
+
+  /* ---------- remote helpers (Google Apps Script) ---------- */
+  /* Sent as text/plain on purpose: it keeps the request "simple" so the
+     browser skips the CORS preflight that Apps Script cannot answer. */
+  async function post(payload){
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+  async function getRows(){
+    const res = await fetch(url + (url.indexOf('?')>=0?'&':'?') + 'action=list&t=' + Date.now(), {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    return Array.isArray(data.rows) ? data.rows : [];
+  }
+
+  function queue(ev){
+    const p = hasLocal ? readLocal(PENDING_KEY) : [];
+    p.push(ev);
+    if(hasLocal) writeLocal(PENDING_KEY, p);
+    else memEvents.push(ev);
+  }
+  function pendingCount(){
+    return hasLocal ? readLocal(PENDING_KEY).length : 0;
+  }
+
+  /* send anything that failed earlier */
+  async function flush(){
+    if(!hasRemote || !hasLocal) return;
+    const p = readLocal(PENDING_KEY);
+    if(!p.length) return;
+    try{
+      await post({action:'append', rows:p});
+      writeLocal(PENDING_KEY, []);
+      lastError = '';
+      lastSync = Date.now();
+    }catch(e){ lastError = 'sync: '+(e && e.message || e); }
+  }
+
+  /* ---------- public API ---------- */
+  function newId(){
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+  }
+
+  /* every single thing that happens goes through here */
+  async function append(ev){
+    const row = Object.assign({id:newId(), t:Date.now()}, ev);
+    pushStore(row);                        // always keep a local copy
+    if(hasRemote){
+      try{
+        await post({action:'append', rows:[row]});
+        lastError = '';
+        lastSync = Date.now();
+      }catch(e){
+        lastError = 'send: '+(e && e.message || e);
+        queue(row);                        // retried automatically
+      }
+    }
+    return row;
+  }
+
+  /* fire-and-forget: never blocks the UI */
+  function log(ev){ append(ev).catch(()=>{}); }
+
+  /* everything ever recorded, newest last, de-duplicated */
+  async function all(){
+    const seen = Object.create(null);
+    const out = [];
+    const add = list => list.forEach(r=>{
+      if(!r || !r.id || seen[r.id]) return;
+      seen[r.id] = 1;
+      out.push(r);
+    });
+
+    if(hasRemote){
+      try{
+        add(await getRows());
+        lastError = '';
+        lastSync = Date.now();
+      }catch(e){ lastError = 'load: '+(e && e.message || e); }
+    }
+    add(localAll());                       // local copy fills any gap
+    out.sort((a,b)=> (a.t||0) - (b.t||0));
+    return out;
+  }
+
+  async function clear(){
+    if(hasLocal){ writeLocal(LOCAL_KEY, []); writeLocal(PENDING_KEY, []); }
+    memEvents = [];
+    if(hasRemote){
+      try{ await post({action:'clear'}); }
+      catch(e){ lastError = 'clear: '+(e && e.message || e); }
+    }
+  }
+
+  function status(){
+    return {backend, url, pending: pendingCount(), lastError, lastSync};
+  }
+
+  if(hasRemote){
+    setInterval(flush, 20000);
+    window.addEventListener('online', flush);
+    flush();
+  }
+
+  return {append, log, all, clear, status, newId, backend};
+})();
+</script>
+
+<!-- ===== TICKET ENGINE ===== -->
+<script>
+window.IGETicket = (function(){
+  "use strict";
+
+  /* IATA airline accounting codes — the 3-digit prefix of every e-ticket number */
+  const AIRLINE = {
+    SV:{n:'065', name:'SAUDIA'},
+    MS:{n:'077', name:'EGYPTAIR'},
+    EK:{n:'176', name:'EMIRATES'},
+    TK:{n:'235', name:'TURKISH AIRLINES'},
+    LH:{n:'220', name:'LUFTHANSA'},
+    BA:{n:'125', name:'BRITISH AIRWAYS'},
+    AF:{n:'057', name:'AIR FRANCE'},
+    QR:{n:'157', name:'QATAR AIRWAYS'},
+    EY:{n:'607', name:'ETIHAD AIRWAYS'},
+    LX:{n:'724', name:'SWISS'}
+  };
+  const CITY = {
+    CAI:'CAIRO', LON:'LONDON', DXB:'DUBAI', JED:'JEDDAH', RUH:'RIYADH', AUH:'ABU DHABI',
+    DOH:'DOHA', IST:'ISTANBUL', CDG:'PARIS', FRA:'FRANKFURT', MUC:'MUNICH', ZRH:'ZURICH',
+    JFK:'NEW YORK', LAX:'LOS ANGELES', HRG:'HURGHADA', SSH:'SHARM EL SHEIKH', LXR:'LUXOR',
+    ASW:'ASWAN', ATH:'ATHENS', ROM:'ROME', MAD:'MADRID', AMS:'AMSTERDAM', KWI:'KUWAIT',
+    BEY:'BEIRUT', AMM:'AMMAN', TUN:'TUNIS', CMN:'CASABLANCA', NBO:'NAIROBI'
+  };
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  function esc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* deterministic per-PNR generator — reprinting always gives the same numbers */
+  function seeded(str){
+    let h = 2166136261 >>> 0;
+    for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    let s = (h % 2147483646) + 1;
+    return function(){ s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  }
+  function digits(rnd, n){
+    let out='';
+    for(let i=0;i<n;i++) out += Math.floor(rnd()*10);
+    return out;
+  }
+  /* 13-digit e-ticket number: 3-digit airline code + 9 serial digits + mod-7 check digit */
+  function ticketNumber(carrier, rnd){
+    const code = (AIRLINE[carrier] && AIRLINE[carrier].n) || '000';
+    const body = digits(rnd, 9);
+    const first12 = code + body;
+    let rem = 0;
+    for(const ch of first12) rem = (rem*10 + Number(ch)) % 7;
+    return first12 + rem;
+  }
+
+  function fmtDate(ddmmm, year){
+    if(!ddmmm) return '';
+    const m = String(ddmmm).match(/^(\d{1,2})([A-Z]{3})$/);
+    if(!m) return String(ddmmm);
+    return m[1].padStart(2,'0') + m[2] + String(year).slice(-2);
+  }
+  function addDays(ddmmm, days, year){
+    const m = String(ddmmm).match(/^(\d{1,2})([A-Z]{3})$/);
+    if(!m) return String(ddmmm);
+    const d = new Date(year, MONTHS.indexOf(m[2]), Number(m[1]));
+    d.setDate(d.getDate() + days);
+    return String(d.getDate()).padStart(2,'0') + MONTHS[d.getMonth()] + String(d.getFullYear()).slice(-2);
+  }
+  function hhmm(t){
+    const s = String(t||'').padStart(4,'0');
+    return s.slice(0,2)+':'+s.slice(2);
+  }
+  function city(code){ return CITY[code] || String(code||''); }
+  function money(n){
+    return Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function stamp(ts){
+    const d = new Date(ts || Date.now());
+    return String(d.getDate()).padStart(2,'0') + MONTHS[d.getMonth()] + String(d.getFullYear()).slice(-2);
+  }
+
+  /* ---------- derive the whole document from a stored PNR ---------- */
+  function build(pnr){
+    const locator = pnr.locator || 'XXXXXX';
+    const rnd = seeded(locator);
+    const issued = pnr.confirmedAt || Date.now();
+    const year = new Date(issued).getFullYear();
+    const segs = pnr.segments || [];
+    const names = (pnr.names && pnr.names.length) ? pnr.names : [{surname:'PASSENGER', given:'UNNAMED', title:''}];
+    const plating = segs.length ? segs[0].carrier : 'MS';
+
+    /* fare: reuse the priced total when the trainee ran FXP/FXR, otherwise derive one */
+    const paxCount = names.length;
+    let totalAll = (pnr.total || pnr.total === 0) ? Number(pnr.total) : null;
+    let perPax;
+    if(totalAll === null){
+      perPax = 0;
+      segs.forEach((s,i)=>{ perPax += 90 + (i+1)*35 + Math.floor(rnd()*120); });
+      if(!perPax) perPax = 180;
+      totalAll = perPax * paxCount;
+    } else {
+      perPax = totalAll / paxCount;
+    }
+    /* split the per-passenger amount into a fare and the usual tax codes */
+    const base   = Math.round(perPax * 0.68 * 100) / 100;
+    const yq     = Math.round(perPax * 0.16 * 100) / 100;
+    const depTax = Math.round(perPax * 0.09 * 100) / 100;
+    const xt     = Math.round((perPax - base - yq - depTax) * 100) / 100;
+    const paxTotal = Math.round((base + yq + depTax + xt) * 100) / 100;
+
+    const fareClass = segs.length ? segs[0].bookedClass : 'Y';
+    const oneWay = segs.length < 2;
+    const fareBasis = fareClass + (oneWay ? 'OW' : 'RT') + 'EG';
+    const officeId = 'CAI' + digits(seeded(locator+'OFF'), 2) + 'IG';
+    const iataNo = '9' + digits(seeded(locator+'IATA'), 7);
+
+    const tickets = names.map((nm, i)=>({
+      name: (nm.surname+'/'+nm.given+(nm.title?' '+nm.title:'')).toUpperCase(),
+      number: ticketNumber(plating, seeded(locator+'|TKT'+i))
+    }));
+
+    const firstDate = segs.length ? segs[0].date : null;
+    const nvb = firstDate ? fmtDate(firstDate, year) : '';
+    const nva = firstDate ? addDays(firstDate, 365, year) : '';
+
+    const contacts = pnr.contacts || [];
+    let phone = (contacts.find(c=>c.type==='PHONE')||{}).value || '';
+    phone = phone.replace(/^[A-Z]{3}\s+/,'').replace(/\/[A-Z]$/,'').trim();
+    const email = (contacts.find(c=>c.type==='EMAIL')||{}).value || '';
+
+    /* IATA fare construction line */
+    let calc = '';
+    if(segs.length){
+      calc = segs[0].origin + ' ';
+      segs.forEach((s,i)=>{ calc += s.carrier + ' ' + s.dest + ' ' + (i===segs.length-1 ? money(base) + ' ' : ''); });
+      calc += 'NUC' + money(base) + ' END ROE1.000000';
+    }
+
+    return {
+      locator, issued, year, segs, names, plating, tickets,
+      base, yq, depTax, xt, paxTotal, totalAll, paxCount,
+      fareBasis, nvb, nva, officeId, iataNo, phone, email, calc,
+      airlineName: (AIRLINE[plating] && AIRLINE[plating].name) || plating,
+      tk: pnr.tk || null,
+      rf: pnr.rf || '',
+      agent: pnr.agentName || ''
+    };
+  }
+
+  /* ---------- one A4 page per passenger ---------- */
+  function page(t, idx){
+    const tkt = t.tickets[idx];
+
+    const rows = t.segs.map(s=>{
+      const dayAfter = '';
+      return `<tr>
+        <td><b>${esc(s.carrier)} ${esc(s.flightNo)}</b><br><span style="font-size:8px;color:#666">${esc(t.airlineName)}</span></td>
+        <td>${esc(city(s.origin))}<br><b>${esc(s.origin)}</b></td>
+        <td>${esc(city(s.dest))}<br><b>${esc(s.dest)}</b></td>
+        <td>${esc(fmtDate(s.date, t.year))}<br>${esc(hhmm(s.dep))}</td>
+        <td>${esc(fmtDate(s.date, t.year))}${dayAfter}<br>${esc(hhmm(s.arr))}</td>
+        <td>${esc(s.bookedClass)}</td>
+        <td>OK</td>
+        <td>${esc(t.fareBasis)}</td>
+        <td>1PC</td>
+        <td>${esc(s.aircraft)}</td>
+        <td>CONFIRMED</td>
+      </tr>`;
+    }).join('');
+
+    const tkLine = t.tk ? 'TK' + t.tk.code + (t.tk.detail||'') : 'TKOK';
+
+    return `<div class="tkt-page">
+      <div class="tkt-band">Training document · not valid for travel, visa, insurance or reimbursement · وثيقة تدريب غير صالحة للسفر</div>
+
+      <div class="tkt-head">
+        <div class="tkt-issuer">
+          <div class="mark"><svg class="ico solid"><use href="#i-plane"/></svg></div>
+          <div>
+            <h1>I.G.E</h1>
+            <div class="sub">Institute of Global Enterprise · Training Agency</div>
+          </div>
+        </div>
+        <div class="tkt-doc">
+          <div class="kind">Electronic Ticket<small>Itinerary / Receipt</small></div>
+        </div>
+      </div>
+
+      <div class="tkt-strip">
+        <div><div class="lbl">Booking Reference</div><div class="val">${esc(t.locator)}</div></div>
+        <div><div class="lbl">Ticket Number</div><div class="val">${esc(tkt.number.slice(0,3))} ${esc(tkt.number.slice(3))}</div></div>
+        <div><div class="lbl">Issue Date</div><div class="val">${esc(stamp(t.issued))}</div></div>
+        <div><div class="lbl">Passenger ${idx+1} of ${t.paxCount}</div><div class="val">${esc(String(idx+1).padStart(2,'0'))}</div></div>
+      </div>
+
+      <div class="tkt-sec">
+        <h2>Passenger</h2>
+        <div class="tkt-two">
+          <div>
+            <div class="kv"><div class="k">Name</div><div class="v">${esc(tkt.name)}</div></div>
+            <div class="kv"><div class="k">Frequent flyer</div><div class="v">—</div></div>
+            <div class="kv"><div class="k">Contact phone</div><div class="v">${esc(t.phone||'—')}</div></div>
+          </div>
+          <div>
+            <div class="kv"><div class="k">Email</div><div class="v">${esc(t.email||'—')}</div></div>
+            <div class="kv"><div class="k">Issuing office</div><div class="v">${esc(t.officeId)}</div></div>
+            <div class="kv"><div class="k">IATA number</div><div class="v">${esc(t.iataNo)}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tkt-sec">
+        <h2>Itinerary</h2>
+        <table class="tkt">
+          <thead><tr>
+            <th>Flight</th><th>From</th><th>To</th><th>Departure</th><th>Arrival</th>
+            <th>Cls</th><th>St</th><th>Fare basis</th><th>Bag</th><th>Eqp</th><th>Status</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="11">NO SEGMENTS</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div class="tkt-sec">
+        <h2>Fare details</h2>
+        <div class="tkt-two">
+          <div>
+            <div class="kv"><div class="k">Fare</div><div class="v">USD ${esc(money(t.base))}</div></div>
+            <div class="kv"><div class="k">Tax EG</div><div class="v">USD ${esc(money(t.depTax))}</div></div>
+            <div class="kv"><div class="k">Carrier surcharge YQ</div><div class="v">USD ${esc(money(t.yq))}</div></div>
+            <div class="kv"><div class="k">Tax XT</div><div class="v">USD ${esc(money(t.xt))}</div></div>
+          </div>
+          <div>
+            <div class="kv"><div class="k">Form of payment</div><div class="v">CASH</div></div>
+            <div class="kv"><div class="k">Not valid before</div><div class="v">${esc(t.nvb||'—')}</div></div>
+            <div class="kv"><div class="k">Not valid after</div><div class="v">${esc(t.nva||'—')}</div></div>
+            <div class="kv"><div class="k">Ticketing</div><div class="v">${esc(tkLine)}</div></div>
+          </div>
+        </div>
+        <div class="tkt-total"><span class="l">Total per passenger</span><span class="r">USD ${esc(money(t.paxTotal))}</span></div>
+      </div>
+
+      <div class="tkt-sec">
+        <h2>Fare calculation</h2>
+        <div class="fare-calc">${esc(t.calc || '—')}</div>
+      </div>
+
+      <div class="tkt-sec">
+        <h2>Endorsements / restrictions</h2>
+        <div class="fare-calc">NON ENDORSABLE · NON REFUNDABLE · CHANGES SUBJECT TO FARE RULES AND PENALTY · TRAINING ISSUE ONLY</div>
+      </div>
+
+      <div class="tkt-notes">
+        <b>هذه وثيقة تدريبية صادرة عن محاكي I.G.E ولا تمثل تذكرة سفر فعلية.</b>
+        This document is produced by a classroom simulator. It is not connected to any airline or GDS inventory,
+        no seat is held, no payment has been taken, and it cannot be used for travel, check-in, visa applications,
+        insurance claims or expense reimbursement. Carriage on a genuine ticket is subject to the Conditions of
+        Contract and the Warsaw or Montreal Convention as applicable. Passengers must present valid travel
+        documents and report to check-in within the time limits set by the operating carrier.
+      </div>
+
+      <div class="bar"></div>
+      <div class="bar-num">${esc(tkt.number)}</div>
+
+      <div class="tkt-foot">
+        <span>PNR ${esc(t.locator)} · RF ${esc(t.rf||'—')} · ${esc(t.officeId)}</span>
+        <span>PAGE ${idx+1}/${t.paxCount} · I.G.E TRAINING SIMULATOR</span>
+      </div>
+    </div>`;
+  }
+
+  function render(pnr){
+    const t = build(pnr);
+    return t.tickets.map((_,i)=>page(t,i)).join('');
+  }
+
+  /* ---------- modal control ---------- */
+  const modal = document.getElementById('ticketModal');
+  const sheet = document.getElementById('ticketSheet');
+  const titleEl = document.getElementById('ticketTitle');
+
+  function open(pnr){
+    if(!pnr || !pnr.locator) return;
+    sheet.innerHTML = render(pnr);
+    titleEl.textContent = 'Electronic Ticket — ' + pnr.locator;
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(){
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    sheet.innerHTML = '';
+  }
+  function print(){
+    try{ window.print(); }
+    catch(e){ alert('المتصفح منع نافذة الطباعة. افتحي الصفحة في تبويب مستقل ثم اضغطي طباعة (Ctrl+P) واختاري "حفظ كـ PDF".'); }
+  }
+
+  document.getElementById('btnTicketClose').addEventListener('click', close);
+  document.getElementById('btnTicketPrint').addEventListener('click', print);
+  modal.addEventListener('click', e=>{ if(e.target === modal) close(); });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && modal.classList.contains('show')) close();
+  });
+
+  return { open, close, render, build };
+})();
+</script>
+
+
+<!-- ===== ADMIN APP ===== -->
+<script>
+(function(){
+  "use strict";
+  const D = window.IGEData;
+
+  let sessions = [];
+  let filter = '';
+  let timer = null;
+
+  /* ---------- helpers ---------- */
+  function fmtTime(ts){
+    if(!ts) return '—';
+    const d = new Date(ts);
+    const p = n => n<10 ? '0'+n : ''+n;
+    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' · '+p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function clock(ts){
+    const d = new Date(ts); const p = n => n<10?'0'+n:''+n;
+    return p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function initials(name){
+    const parts = String(name||'?').trim().split(/\s+/).slice(0,2);
+    return parts.map(p=>p.charAt(0)).join('').toUpperCase() || '?';
+  }
+  function esc(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function sameDay(ts){
+    const a = new Date(ts), b = new Date();
+    return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+  }
+  function ico(id){ return '<svg class="ico"><use href="#'+id+'"/></svg>'; }
+
+  const EVENT_META = {
+    login:  {i:'i-user',     t:'دخول',  c:'ev-login'},
+    cmd:    {i:'i-list',     t:'أمر',    c:'ev-cmd'},
+    pnr:    {i:'i-ticket',   t:'حجز',   c:'ev-pnr'},
+    ticket: {i:'i-download', t:'تذكرة', c:'ev-tkt'},
+    cancel: {i:'i-trash',    t:'إلغاء', c:'ev-cancel'},
+    reset:  {i:'i-refresh',  t:'مسح',   c:'ev-cancel'},
+    nav:    {i:'i-compass',  t:'تصفح',  c:'ev-nav'}
+  };
+
+  /* ---------- rebuild sessions from the raw event stream ---------- */
+  function groupEvents(rows){
+    const map = Object.create(null);
+    rows.forEach(r=>{
+      if(!r || !r.sid) return;
+      let s = map[r.sid];
+      if(!s){
+        s = map[r.sid] = {
+          sid: r.sid, name: r.name || '—', phone: r.phone || '',
+          loginAt: r.t, lastAt: r.t, commands: 0, bookings: [], cancelled: [], events: []
+        };
+      }
+      if(r.name && s.name === '—') s.name = r.name;
+      if(r.phone && !s.phone) s.phone = r.phone;
+      s.loginAt = Math.min(s.loginAt, r.t || s.loginAt);
+      s.lastAt  = Math.max(s.lastAt,  r.t || s.lastAt);
+      if(r.k === 'cmd') s.commands++;
+      if(r.k === 'pnr' && r.data && r.data.locator){
+        const at = s.bookings.findIndex(b=>b.locator === r.data.locator);
+        if(at >= 0) s.bookings[at] = r.data; else s.bookings.push(r.data);
+      }
+      if(r.k === 'cancel' && r.data && r.data.locator) s.cancelled.push(r.data.locator);
+      s.events.push(r);
+    });
+    const out = Object.keys(map).map(k=>map[k]);
+    out.forEach(s=>{
+      s.events.sort((a,b)=>(a.t||0)-(b.t||0));
+      s.live = s.bookings.filter(b=> s.cancelled.indexOf(b.locator) < 0);
+    });
+    out.sort((a,b)=> a.loginAt - b.loginAt);
+    return out;
+  }
+
+  /* ---------- booking card ---------- */
+  function bookingCard(b, cancelled){
+    const names = (b.names||[]).length
+      ? (b.names||[]).map(n=>`<div class="bk-line">${esc(n.surname)}/${esc(n.given)}${n.title?' <span class="dim">'+esc(n.title)+'</span>':''}</div>`).join('')
+      : '<div class="bk-line dim">—</div>';
+    const segs = (b.segments||[]).length
+      ? (b.segments||[]).map(s=>
+          `<div class="seg-line">${ico('i-plane')}<b>${esc(s.carrier)}${esc(s.flightNo)}</b> ` +
+          `${esc(s.origin)}→${esc(s.dest)} · ${esc(s.date)} · ${esc(s.dep)}-${esc(s.arr)} · ` +
+          `<span class="dim">CLS ${esc(s.bookedClass)} · HK${esc(s.paxCount)} · ${esc(s.aircraft)}</span></div>`
+        ).join('')
+      : '<div class="bk-line dim">—</div>';
+    const contacts = (b.contacts||[]).length
+      ? (b.contacts||[]).map(c=>`<div class="bk-line"><span class="dim">${esc(c.type)}:</span> <span class="mono">${esc(c.value)}</span></div>`).join('')
+      : '<div class="bk-line dim">—</div>';
+    const tk = b.tk ? 'TK'+esc(b.tk.code)+esc(b.tk.detail||'') : '—';
+    const total = (b.total || b.total === 0) ? 'USD '+Number(b.total).toFixed(2) : 'لم يتم التسعير';
+
+    return `<div class="booking-card">
+      <div class="booking-head">
+        <span class="loc">${ico('i-ticket')}${esc(b.locator)}</span>
+        <span class="when">${ico('i-clock')}تأكيد: ${fmtTime(b.confirmedAt)}</span>
+        ${cancelled ? '<span class="tag-none">ملغي</span>' : ''}
+        <span class="total">${total}</span>
+        <button class="print-btn" data-print="${esc(b.locator)}">${ico('i-download')}التذكرة</button>
+      </div>
+      <div class="booking-grid">
+        <div class="bk-block"><h5>${ico('i-passport')}الركاب (${(b.names||[]).length})</h5>${names}</div>
+        <div class="bk-block"><h5>${ico('i-takeoff')}الرحلات (${(b.segments||[]).length})</h5>${segs}</div>
+        <div class="bk-block"><h5>${ico('i-phone')}بيانات التواصل</h5>${contacts}</div>
+        <div class="bk-block"><h5>${ico('i-list')}التذكرة</h5>
+          <div class="bk-line"><span class="dim">Ticketing:</span> <span class="mono">${tk}</span></div>
+          <div class="bk-line"><span class="dim">Received from:</span> <span class="mono">${esc(b.rf||'—')}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function activityBlock(s){
+    const rows = s.events.slice().reverse().map(v=>{
+      const meta = EVENT_META[v.k] || EVENT_META.nav;
+      return `<tr class="${esc(v.s||'info')}">
+        <td class="mono">${clock(v.t)}</td>
+        <td><span class="ev-tag ${meta.c}">${ico(meta.i)}${meta.t}</span></td>
+        <td class="mono">${v.c ? esc(v.c) : '<span class="dim">—</span>'}</td>
+        <td>${esc(v.m||'')}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="activity-card">
+      <div class="act-head">${ico('i-log')}سجل النشاط <span class="cnt">${s.events.length} حدث</span></div>
+      <div class="act-scroll">
+        <table class="act">
+          <thead><tr><th>الوقت</th><th>النوع</th><th>الأمر</th><th>النتيجة</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  /* ---------- table ---------- */
+  function visibleRows(){
+    const q = filter.trim().toLowerCase();
+    const rows = sessions.slice().reverse();
+    if(!q) return rows;
+    return rows.filter(s =>
+      String(s.name).toLowerCase().includes(q) ||
+      String(s.phone).toLowerCase().includes(q) ||
+      s.bookings.some(b =>
+        String(b.locator).toLowerCase().includes(q) ||
+        (b.names||[]).some(n=> (n.surname+' '+n.given).toLowerCase().includes(q)) ||
+        (b.segments||[]).some(g=> (g.carrier+g.flightNo+' '+g.origin+g.dest).toLowerCase().includes(q))
+      ) ||
+      s.events.some(v => (String(v.c)+' '+String(v.m)).toLowerCase().includes(q))
+    );
+  }
+
+  function renderStats(){
+    const people = new Set(sessions.map(s=> (s.name||'').trim().toLowerCase()+'|'+(s.phone||'').trim()));
+    const pnrCount = sessions.reduce((n,s)=> n + s.live.length, 0);
+    const evCount  = sessions.reduce((n,s)=> n + s.events.length, 0);
+    const today    = sessions.filter(s=> sameDay(s.loginAt)).length;
+    document.getElementById('statSessions').textContent = sessions.length;
+    document.getElementById('statPeople').textContent = people.size;
+    document.getElementById('statPnrs').textContent = pnrCount;
+    document.getElementById('statEvents').textContent = evCount;
+    document.getElementById('statToday').textContent = today;
+
+    const st = D.status();
+    const note = document.getElementById('storageNote');
+    let desc, warn = true;
+    if(st.backend === 'remote'){
+      warn = !!st.lastError;
+      desc = st.lastError
+        ? 'السيرفر مش راد دلوقتي (' + st.lastError + ') — بيعرض آخر نسخة محفوظة محليًا.'
+        : 'متصل بالسيرفر — كل الأجهزة اللي بتستخدم نظام الحجز بتظهر هنا.';
+    } else if(st.backend === 'local'){
+      desc = 'مفيش رابط سيرفر مضبوط — بيعرض بيانات هذا المتصفح فقط. حطي رابط Apps Script في IGE_API_URL في الملفين.';
+    } else {
+      desc = 'المتصفح مانع التخزين — افتحي الصفحة خارج وضع التصفح الخفي.';
+    }
+    note.innerHTML = `<span class="dot${warn?' warn':''}"></span><span>وضع التخزين: <code>${esc(st.backend)}</code></span><span>${esc(desc)}</span>`;
+
+    const pill = document.getElementById('livePill');
+    pill.className = 'live-pill ' + (st.backend==='remote' ? (st.lastError?'warn':'ok') : 'warn');
+    pill.innerHTML = '<span class="dot"></span>' + (st.backend==='remote' ? (st.lastError?'انقطاع مؤقت':'مباشر') : 'محلي');
+  }
+
+  function renderTable(){
+    const rows = visibleRows();
+    const body = document.getElementById('logBody');
+    const empty = document.getElementById('logEmpty');
+    body.innerHTML = '';
+    if(!rows.length){
+      empty.style.display = 'flex';
+      empty.querySelector('div').textContent = sessions.length === 0
+        ? 'لسه محدش دخل السيستيم. أول ما حد يسجل دخول هيظهر هنا باسمه ورقم تليفونه.'
+        : 'مفيش نتائج مطابقة للبحث.';
+      return;
+    }
+    empty.style.display = 'none';
+
+    rows.forEach((s, i)=>{
+      const num = rows.length - i;
+      const tr = document.createElement('tr');
+      tr.className = 'main-row';
+      tr.innerHTML =
+        `<td class="mono">${num}</td>` +
+        `<td><div class="who-cell"><div class="avatar">${esc(initials(s.name))}</div>` +
+          `<div class="nm">${esc(s.name)}</div></div></td>` +
+        `<td class="mono" dir="ltr">${esc(s.phone||'—')}</td>` +
+        `<td class="mono">${fmtTime(s.loginAt)}</td>` +
+        `<td class="mono">${fmtTime(s.lastAt)}</td>` +
+        `<td class="mono">${s.commands}</td>` +
+        `<td>${s.bookings.length
+            ? s.bookings.map(b=>`<span class="tag-pnr">${esc(b.locator)}</span>`).join('')
+            : '<span class="tag-none">دخول فقط</span>'}</td>` +
+        `<td><span class="chev">${ico('i-chevron')}</span></td>`;
+
+      const detail = document.createElement('tr');
+      detail.className = 'detail-row';
+      detail.style.display = 'none';
+      detail.innerHTML = `<td colspan="8"><div class="detail-inner">${
+        s.bookings.length
+          ? s.bookings.slice().reverse().map(b=>bookingCard(b, s.cancelled.indexOf(b.locator)>=0)).join('')
+          : `<div class="no-bookings">${ico('i-suitcase')}الشخص ده سجّل دخول بس لسه مأكدش أي حجز.</div>`
+      }${activityBlock(s)}</div></td>`;
+
+      tr.addEventListener('click', ()=>{
+        const open = detail.style.display !== 'none';
+        detail.style.display = open ? 'none' : 'table-row';
+        tr.classList.toggle('open', !open);
+      });
+      detail.querySelectorAll('button[data-print]').forEach(btn=>{
+        btn.addEventListener('click', ev=>{
+          ev.stopPropagation();
+          const b = s.bookings.find(x=>x.locator === btn.getAttribute('data-print'));
+          if(b && window.IGETicket) window.IGETicket.open(b);
+        });
+      });
+
+      body.appendChild(tr);
+      body.appendChild(detail);
+    });
+  }
+
+  async function refresh(){
+    const rows = await D.all();
+    sessions = groupEvents(rows);
+    renderStats();
+    renderTable();
+    const st = document.getElementById('adminStamp');
+    if(st) st.textContent = 'آخر تحديث ' + clock(Date.now());
+  }
+
+  /* ---------- exports ---------- */
+  function download(name, text){
+    const blob = new Blob(['\ufeff'+text], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }
+  const cell = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+
+  function exportBookings(){
+    const head = ['#','Name','Phone','Login','Last activity','Commands',
+                  'PNR','Confirmed at','Status','Passengers','Flights','Contacts','Ticketing','Received from','Total USD'];
+    const lines = [head.join(',')];
+    sessions.slice().reverse().forEach((s,i)=>{
+      const num = sessions.length - i;
+      const base = [num, cell(s.name), cell(s.phone), cell(fmtTime(s.loginAt)), cell(fmtTime(s.lastAt)), s.commands];
+      if(!s.bookings.length){ lines.push(base.concat(['','','','','','','','','']).join(',')); return; }
+      s.bookings.forEach(b=>{
+        const pax = (b.names||[]).map(n=>n.surname+'/'+n.given+(n.title?' '+n.title:'')).join(' | ');
+        const flights = (b.segments||[]).map(g=>
+          g.carrier+g.flightNo+' '+g.origin+'-'+g.dest+' '+g.date+' '+g.dep+'/'+g.arr+' '+g.bookedClass+' HK'+g.paxCount).join(' | ');
+        const cts = (b.contacts||[]).map(c=>c.type+': '+c.value).join(' | ');
+        lines.push(base.concat([
+          cell(b.locator), cell(fmtTime(b.confirmedAt)),
+          cell(s.cancelled.indexOf(b.locator)>=0 ? 'CANCELLED' : 'CONFIRMED'),
+          cell(pax), cell(flights), cell(cts),
+          cell(b.tk ? 'TK'+b.tk.code+(b.tk.detail||'') : ''), cell(b.rf||''),
+          (b.total||b.total===0) ? Number(b.total).toFixed(2) : ''
+        ]).join(','));
+      });
+    });
+    download('ige-bookings.csv', lines.join('\n'));
+  }
+
+  function exportActivity(){
+    const lines = [['Time','Name','Phone','Type','Command','Result','Status'].join(',')];
+    sessions.slice().reverse().forEach(s=>{
+      s.events.slice().reverse().forEach(v=>{
+        const meta = EVENT_META[v.k] || EVENT_META.nav;
+        lines.push([cell(fmtTime(v.t)), cell(s.name), cell(s.phone),
+                    cell(meta.t), cell(v.c||''), cell(v.m||''), cell(v.s||'')].join(','));
+      });
+    });
+    download('ige-activity-log.csv', lines.join('\n'));
+  }
+
+  /* ---------- wiring ---------- */
+  document.getElementById('btnRefresh').addEventListener('click', refresh);
+  document.getElementById('btnExport').addEventListener('click', exportBookings);
+  document.getElementById('btnExportLog').addEventListener('click', exportActivity);
+  document.getElementById('btnClear').addEventListener('click', async ()=>{
+    if(!confirm('هيتم مسح كل السجل نهائيًا. تكملي؟')) return;
+    await D.clear();
+    await refresh();
+  });
+  document.getElementById('logSearch').addEventListener('input', e=>{
+    filter = e.target.value;
+    renderTable();
+  });
+
+  /* ---------- login ---------- */
+  const lock = document.getElementById('lockScreen');
+  const pass = document.getElementById('pass');
+  const passErr = document.getElementById('passErr');
+
+  function tryEnter(){
+    if(pass.value !== window.IGE_ADMIN_PASSWORD){
+      pass.classList.add('invalid');
+      passErr.classList.add('show');
+      pass.select();
+      return;
+    }
+    pass.value = '';
+    lock.classList.add('hidden');
+    refresh();
+    clearInterval(timer);
+    timer = setInterval(refresh, 15000);
+  }
+  document.getElementById('btnEnter').addEventListener('click', tryEnter);
+  pass.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); tryEnter(); } });
+  pass.addEventListener('input', ()=>{
+    pass.classList.remove('invalid');
+    passErr.classList.remove('show');
+  });
+  pass.focus();
+})();
+</script>
+</body>
+</html>
